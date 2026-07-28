@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
 using Plugin.Firebase.CloudMessaging;
+using RIoT2.Mobile.ViewModels;
 
 namespace RIoT2.Mobile.Services
 {
@@ -50,33 +52,17 @@ namespace RIoT2.Mobile.Services
                 CrossFirebaseCloudMessaging.Current.NotificationReceived += (_, e) =>
                     _logger.LogInformation("FCM notification received: {Title}", e.Notification?.Title);
 
-                // Deep-link when the user taps a notification while the app is running/backgrounded.
+                // Deep-link when the user taps a notification. This also fires for
+                // the notification that cold-started the app, once handlers are wired.
                 CrossFirebaseCloudMessaging.Current.NotificationTapped += (_, e) =>
                     _ = HandleNotificationTappedAsync(e.Notification);
 
                 await UpdateChannelSubscriptionsAsync();
                 _isInitialized = true;
-
-                // Handle the notification that may have cold-started the app.
-                await ProcessPendingNotificationAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize push notifications.");
-            }
-        }
-
-        public async Task ProcessPendingNotificationAsync()
-        {
-            try
-            {
-                var pending = await CrossFirebaseCloudMessaging.Current.GetInitialNotificationAsync();
-                if (pending is not null)
-                    await HandleNotificationTappedAsync(pending);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to process the launch notification.");
             }
         }
 
