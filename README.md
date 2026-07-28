@@ -6,32 +6,63 @@ It is the cross-platform successor to the legacy Xamarin `RIoT2.Android` app.
 ## Features
 
 - **Dashboard** — hosts the RIoT2 web dashboard in a `WebView` with a loading
-  indicator and a friendly offline/error page.
+  indicator, pull-to-refresh, connectivity tracking, and a friendly offline/error page.
 - **Settings** — configure the controller URL and toggle **Alerts** /
   **Notifications** (persisted via `Preferences`, keys preserved from the legacy app).
 - **Push notifications** — Firebase Cloud Messaging (FCM) with `alerts` and
   `notifications` topic subscriptions.
-- **Cross-platform** — Android, iOS, macOS (Mac Catalyst), and Windows.
+- **MVVM** — built with `CommunityToolkit.Mvvm` (`ObservableObject`, `[ObservableProperty]`,
+  `[RelayCommand]`) and Shell navigation.
+
+## Supported Platforms
+
+Actively built out of the box (see `<TargetFrameworks>` in
+[`RIoT2.Mobile.csproj`](RIoT2.Mobile.csproj)):
+
+- **Android** (`net9.0-android`)
+- **Windows** (`net9.0-windows10.0.19041.0`)
+
+Standard `dotnet new maui` scaffolding for **iOS**, **Mac Catalyst**, and
+**Tizen** is present under [`Platforms/`](Platforms/), but those target
+frameworks are commented out in the `.csproj` and not built by default. Add
+them back to `<TargetFrameworks>` to enable those platforms.
 
 ## Requirements
 
 - Visual Studio 2022 with the **.NET Multi-platform App UI development** workload.
-- .NET 9 SDK.
+- .NET 9 SDK (see [`global.json`](global.json)).
 - A Firebase project (see [Firebase Setup](#firebase-console-setup)).
 
 ## Project Structure
+
+```
+Platforms/        Platform-specific entry points (Android, iOS, MacCatalyst, Tizen, Windows)
+Resources/         Fonts, images, app icon, splash screen, and styles
+Services/           IPushNotificationService / PushNotificationService (FCM)
+                    ISettingsService / SettingsService (Preferences-backed settings)
+ViewModels/        DashboardViewModel, SettingsViewModel (CommunityToolkit.Mvvm)
+Views/             DashboardPage, SettingsPage (XAML)
+MauiProgram.cs      App startup: DI registration, fonts, Firebase, ViewModel/Page registration
+AppShell.xaml       Shell navigation host and route registration
+```
 
 ## Getting Started
 
 1. Clone the repository.
 2. Complete the [Firebase setup](#firebase-console-setup) below.
-3. Restore packages and build: dotnet restore dotnet build -f net9.0-android
-4. Select a target (Android/iOS/Windows) in Visual Studio and run.
+3. Restore and build:
+
+   ```bash
+   dotnet restore
+   dotnet build -f net9.0-android
+   ```
+
+4. Select a target (Android/Windows) in Visual Studio and run.
 
 ## Configuration
 
 The default controller URL and notification toggles can be changed at runtime
-inthe **Settings** page. Values are stored with these `Preferences` keys
+in the **Settings** page. Values are stored with these `Preferences` keys
 (kept identical to the legacy app):
 
 | Setting | Key |
