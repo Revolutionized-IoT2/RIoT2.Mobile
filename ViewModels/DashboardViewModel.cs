@@ -5,6 +5,7 @@ using RIoT2.Mobile.Views;
 
 namespace RIoT2.Mobile.ViewModels
 {
+    [QueryProperty(nameof(Source), nameof(Source))]
     public partial class DashboardViewModel : ObservableObject, IDisposable
     {
         private readonly ISettingsService _settings;

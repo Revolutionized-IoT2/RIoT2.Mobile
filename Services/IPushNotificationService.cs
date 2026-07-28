@@ -20,5 +20,11 @@ namespace RIoT2.Mobile.Services
         /// based on the current user settings.
         /// </summary>
         Task UpdateChannelSubscriptionsAsync();
+
+        /// <summary>
+        /// Handles a notification the user tapped that arrived before the FCM
+        /// handlers were wired up (e.g., a cold start launched by the tap).
+        /// </summary>
+        Task ProcessPendingNotificationAsync();
     }
 }

@@ -15,6 +15,11 @@ namespace RIoT2.Mobile.Services
         private const string AlertsTopic = "alerts";
         private const string NotificationsTopic = "notifications";
 
+        // Data-payload keys used for deep-linking. The server includes these in
+        // the FCM message's "data" section, e.g. { "route": "//dashboard" }.
+        private const string RouteKey = "route";
+        private const string UrlKey = "url";
+
         private readonly ISettingsService _settings;
         private readonly ILogger<PushNotificationService> _logger;
         private bool _isInitialized;
@@ -45,12 +50,33 @@ namespace RIoT2.Mobile.Services
                 CrossFirebaseCloudMessaging.Current.NotificationReceived += (_, e) =>
                     _logger.LogInformation("FCM notification received: {Title}", e.Notification?.Title);
 
+                // Deep-link when the user taps a notification while the app is running/backgrounded.
+                CrossFirebaseCloudMessaging.Current.NotificationTapped += (_, e) =>
+                    _ = HandleNotificationTappedAsync(e.Notification);
+
                 await UpdateChannelSubscriptionsAsync();
                 _isInitialized = true;
+
+                // Handle the notification that may have cold-started the app.
+                await ProcessPendingNotificationAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize push notifications.");
+            }
+        }
+
+        public async Task ProcessPendingNotificationAsync()
+        {
+            try
+            {
+                var pending = await CrossFirebaseCloudMessaging.Current.GetInitialNotificationAsync();
+                if (pending is not null)
+                    await HandleNotificationTappedAsync(pending);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to process the launch notification.");
             }
         }
 
@@ -74,6 +100,52 @@ namespace RIoT2.Mobile.Services
             {
                 _logger.LogError(ex, "Failed to update FCM topic subscriptions.");
             }
+        }
+
+        /// <summary>
+        /// Navigates based on the tapped notification's data payload. Supports a
+        /// Shell <c>route</c> and/or a <c>url</c> to open in the dashboard.
+        /// </summary>
+        private async Task HandleNotificationTappedAsync(FCMNotification? notification)
+        {
+            if (notification?.Data is null)
+                return;
+
+            var data = notification.Data;
+            data.TryGetValue(RouteKey, out var route);
+            data.TryGetValue(UrlKey, out var url);
+
+            if (string.IsNullOrWhiteSpace(route) && string.IsNullOrWhiteSpace(url))
+                return;
+
+            // Shell navigation must run on the UI thread.
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                try
+                {
+                    if (Shell.Current is null)
+                        return;
+
+                    // Default to the dashboard route when only a URL was provided.
+                    var target = string.IsNullOrWhiteSpace(route) ? "//dashboard" : route!;
+
+                    if (!string.IsNullOrWhiteSpace(url))
+                    {
+                        await Shell.Current.GoToAsync(target, new Dictionary<string, object>
+                        {
+                            [nameof(DashboardViewModel.Source)] = url!
+                        });
+                    }
+                    else
+                    {
+                        await Shell.Current.GoToAsync(target);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to deep-link from notification.");
+                }
+            });
         }
     }
 }
