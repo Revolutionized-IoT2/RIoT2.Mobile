@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RIoT2.Mobile.ViewModels"
+             x:Class="RIoT2.Mobile.Views.DashboardPage"
+             x:DataType="vm:DashboardViewModel"
+             Title="RIoT2">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Refresh"
+                     Command="{Binding RefreshCommand}" />
+        <ToolbarItem Text="Settings"
+                     Command="{Binding OpenSettingsCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <WebView x:Name="Web"
+                 Source="{Binding Source}"
+                 Navigating="OnNavigating"
+                 Navigated="OnNavigated" />
+
+        <ActivityIndicator IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+    </Grid>
+
+</ContentPage>

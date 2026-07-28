@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RIoT2.Mobile.ViewModels"
+             x:Class="RIoT2.Mobile.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="Controller URL" />
+            <Entry Text="{Binding DashboardUrl}"
+                   Keyboard="Url"
+                   Placeholder="http://..." />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Alerts"
+                       VerticalOptions="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding AlertsEnabled}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Notifications"
+                       VerticalOptions="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding NotificationsEnabled}" />
+            </Grid>
+
+            <Button Text="Save"
+                    Command="{Binding SaveCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
