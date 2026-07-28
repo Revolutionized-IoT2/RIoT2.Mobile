@@ -1,4 +1,5 @@
 ﻿using RIoT2.Mobile.Services;
+using Application = Microsoft.Maui.Controls.Application;
 
 namespace RIoT2.Mobile
 {

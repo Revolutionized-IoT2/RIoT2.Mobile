@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
 using Plugin.Firebase.CloudMessaging;
 using RIoT2.Mobile.Services;
 using RIoT2.Mobile.ViewModels;
@@ -53,7 +54,9 @@ namespace RIoT2.Mobile
             {
 #if ANDROID
                 events.AddAndroid(android => android.OnCreate((activity, _) =>
-                    CrossFirebase.Initialize(activity)));
+                    CrossFirebase.Initialize(
+                        Android.App.Application.Context as Android.App.Activity,
+                        () => Platform.CurrentActivity)));
 #elif IOS
                 events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) =>
                 {

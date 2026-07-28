@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1060441965231",
+    "firebase_url": "https://riot-184512.firebaseio.com",
+    "project_id": "riot-184512",
+    "storage_bucket": "riot-184512.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060441965231:android:f45bfabe5ba8246f",
+        "android_client_info": {
+          "package_name": "com.riot.jsuutari.riotmessanger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1060441965231-ekr7puj46ug692k3ju2jn81ujojmu1ih.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.riot.jsuutari.riotmessanger",
+            "certificate_hash": "003796477867fb8aa6426b14857b03ee4c8ca478"
+          }
+        },
+        {
+          "client_id": "1060441965231-7lgd26a9hrjain5dtbgsnsuk5sc5nsb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaGQiMMYAB0S4YAulSLk-314Zr3BSoeHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1060441965231-7lgd26a9hrjain5dtbgsnsuk5sc5nsb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
