@@ -83,31 +83,31 @@ Push notifications require a Firebase project and platform config files.
 ### 2. Register the Android App
 
 1. In the project overview, click the **Android** icon (**Add app**).
-2. **Android package name** —must match `<ApplicationId>` in `RIoT2.Mobile.csproj`: com.companyname.riot2.mobile
-> Change this to a real identifier before publishing to the Play Store — it
-> cannot be changed later. Update both the `.csproj` and Firebase to match.
+2. **Android package name** — must match `<ApplicationId>` in [`RIoT2.Mobile.csproj`](RIoT2.Mobile.csproj) (currently `com.riot.jsuutari.riotmessanger`).
+   > Change this to a real identifier before publishing to the Play Store — it
+   > cannot be changed later. Update both the `.csproj` and Firebase to match.
 3. Click **Register app** and **download `google-services.json`**.
-4. Place the file at: Platforms/Android/google-services.json
+4. Place the file at `Platforms/Android/google-services.json`.
 5. Confirm its **Build Action** is `GoogleServicesJson` (already wired in the `.csproj`).
 
-### 3. Register the iOS App (optional)
+### 3. Register the iOS App (optional, requires enabling `net9.0-ios` in the `.csproj`)
 
 1. Click **Add app** → **iOS** icon.
 2. **Apple bundle ID** — match the iOS bundle identifier (same `ApplicationId`).
 3. **Register app** and **download `GoogleService-Info.plist`**.
-4. Place the file at: Platforms/iOS/GoogleService-Info.plist
-(Build Action `BundleResource`, already wired in the `.csproj`.)
+4. Place the file at `Platforms/iOS/GoogleService-Info.plist`
+   (Build Action `BundleResource`, already wired in the `.csproj`.)
 5. **Upload an APNs authentication key** (required for iOS push):
-- Firebase → **Project settings** → **Cloud Messaging** → **Apple app
-  configuration** → **APNs Authentication Key**.
-- Upload the `.p8` key (created in the Apple Developer portal with the
-  **Apple Push Notifications service** capability),plus the **Key ID** and **Team ID**.
-- Enable the **Push Notifications** capability and add `aps-environment`
-  to `Platforms/iOS/Entitlements.plist`.
+   - Firebase → **Project settings** → **Cloud Messaging** → **Apple app
+     configuration** → **APNs Authentication Key**.
+   - Upload the `.p8` key (created in the Apple Developer portal with the
+     **Apple Push Notifications service** capability), plus the **Key ID** and **Team ID**.
+   - Enable the **Push Notifications** capability and add `aps-environment`
+     to `Platforms/iOS/Entitlements.plist`.
 
 ### 4. Enable Cloud Messaging
 
-Verify **Project settings →Cloud Messaging** shows the
+Verify **Project settings → Cloud Messaging** shows the
 **Cloud Messaging API (V1)** enabled (Plugin.Firebase uses V1).
 
 ### 5. Topics
@@ -118,10 +118,10 @@ time a device subscribes — no console configuration required.
 ### 6. Send a Test Message
 
 1. Firebase console → **Messaging** → **Create your first campaign** →
-**Firebase Notification messages**.
+   **Firebase Notification messages**.
 2. Enter a title and body.
 3. **Target** → **Topic** → select `alerts` or `notifications`.
-4. **Review** → **Publish**and confirm the device receives it.
+4. **Review** → **Publish** and confirm the device receives it.
 
 To test a single device, copy the FCM token printed in the debug output
 (logged by `PushNotificationService.InitializeAsync`) and use
@@ -140,6 +140,6 @@ To test a single device, copy the FCM token printed in the debug output
 
 ## Migration Notes
 
-This app replaces the legacy Xamarin `RIoT2.Android` project. See
-[`docs/PORTING_PLAN.md`](docs/PORTING_PLAN.md) for the full porting plan and the
-mapping of legacy components to their MAUI equivalents.
+This app replaces the legacy Xamarin `RIoT2.Android` project. `Preferences`
+keys for settings (see [Configuration](#configuration)) are kept identical to
+the legacy app so existing user data carries over on upgrade.
