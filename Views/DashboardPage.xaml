@@ -13,19 +13,31 @@
                      Command="{Binding OpenSettingsCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid>
-        <RefreshView IsRefreshing="{Binding IsRefreshing}"
-                     Command="{Binding RefreshCommand}">
-            <WebView x:Name="Web"
-                     Source="{Binding Source}"
-                     Navigating="OnNavigating"
-                     Navigated="OnNavigated" />
-        </RefreshView>
+    <Grid RowDefinitions="Auto,*">
 
-        <ActivityIndicator IsRunning="{Binding IsLoading}"
-                           IsVisible="{Binding IsLoading}"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center" />
+        <Label Grid.Row="0"
+               Text="No internet connection"
+               IsVisible="{Binding IsConnected, Converter={StaticResource InvertedBoolConverter}}"
+               BackgroundColor="#B00020"
+               TextColor="White"
+               Padding="12,8"
+               HorizontalTextAlignment="Center" />
+
+        <Grid Grid.Row="1">
+            <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                         Command="{Binding RefreshCommand}">
+                <WebView x:Name="Web"
+                         Source="{Binding Source}"
+                         Navigating="OnNavigating"
+                         Navigated="OnNavigated" />
+            </RefreshView>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+        </Grid>
+
     </Grid>
 
 </ContentPage>

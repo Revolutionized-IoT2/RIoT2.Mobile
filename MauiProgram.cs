@@ -32,6 +32,7 @@ namespace RIoT2.Mobile
             // Services
             builder.Services.AddSingleton<ISettingsService, SettingsService>();
             builder.Services.AddSingleton<IPushNotificationService, PushNotificationService>();
+            builder.Services.AddSingleton(Connectivity.Current);
 
             // ViewModels
             builder.Services.AddTransient<DashboardViewModel>();

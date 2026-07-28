@@ -37,5 +37,11 @@ namespace RIoT2.Mobile.Views
                 };
             }
         }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            _viewModel.Dispose();
+        }
     }
 }
