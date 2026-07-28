@@ -22,6 +22,9 @@ namespace RIoT2.Mobile.Views
         {
             _viewModel.IsLoading = false;
 
+            // Dismiss the pull-to-refresh spinner once the page finishes loading.
+            _viewModel.IsRefreshing = false;
+
             if (e.Result != WebNavigationResult.Success)
             {
                 // Show a local error page, mirroring the legacy error.html behavior.

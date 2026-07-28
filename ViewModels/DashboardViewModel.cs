@@ -15,6 +15,9 @@ namespace RIoT2.Mobile.ViewModels
         [ObservableProperty]
         private bool _isLoading;
 
+        [ObservableProperty]
+        private bool _isRefreshing;
+
         public DashboardViewModel(ISettingsService settings)
         {
             _settings = settings;

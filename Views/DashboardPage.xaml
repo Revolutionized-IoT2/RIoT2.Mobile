@@ -14,10 +14,13 @@
     </ContentPage.ToolbarItems>
 
     <Grid>
-        <WebView x:Name="Web"
-                 Source="{Binding Source}"
-                 Navigating="OnNavigating"
-                 Navigated="OnNavigated" />
+        <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshCommand}">
+            <WebView x:Name="Web"
+                     Source="{Binding Source}"
+                     Navigating="OnNavigating"
+                     Navigated="OnNavigated" />
+        </RefreshView>
 
         <ActivityIndicator IsRunning="{Binding IsLoading}"
                            IsVisible="{Binding IsLoading}"
