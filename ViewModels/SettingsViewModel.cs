@@ -9,6 +9,7 @@ namespace RIoT2.Mobile.ViewModels
     {
         private readonly ISettingsService _settings;
         private readonly IPushNotificationService _push;
+        private readonly IBeaconService _beacon;
 
         [ObservableProperty]
         private string _dashboardUrl;
@@ -19,14 +20,35 @@ namespace RIoT2.Mobile.ViewModels
         [ObservableProperty]
         private bool _notificationsEnabled;
 
-        public SettingsViewModel(ISettingsService settings, IPushNotificationService push)
+        [ObservableProperty]
+        private bool _beaconEnabled;
+
+        [ObservableProperty]
+        private string _beaconKey;
+
+        [ObservableProperty]
+        private string _beaconMessage;
+
+        [ObservableProperty]
+        private int _beaconIntervalSeconds;
+
+        public SettingsViewModel(
+            ISettingsService settings,
+            IPushNotificationService push,
+            IBeaconService beacon)
         {
             _settings = settings;
             _push = push;
+            _beacon = beacon;
 
             _dashboardUrl = _settings.DashboardUrl;
             _alertsEnabled = _settings.AlertsEnabled;
             _notificationsEnabled = _settings.NotificationsEnabled;
+
+            _beaconEnabled = _settings.BeaconEnabled;
+            _beaconKey = _settings.BeaconKey;
+            _beaconMessage = _settings.BeaconMessage;
+            _beaconIntervalSeconds = _settings.BeaconIntervalSeconds;
         }
 
         [RelayCommand]
@@ -36,7 +58,18 @@ namespace RIoT2.Mobile.ViewModels
             _settings.AlertsEnabled = AlertsEnabled;
             _settings.NotificationsEnabled = NotificationsEnabled;
 
+            _settings.BeaconEnabled = BeaconEnabled;
+            _settings.BeaconKey = BeaconKey;
+            _settings.BeaconMessage = BeaconMessage;
+            _settings.BeaconIntervalSeconds = BeaconIntervalSeconds;
+
             await _push.UpdateChannelSubscriptionsAsync();
+
+            // Apply beacon settings immediately.
+            if (BeaconEnabled)
+                await _beacon.RestartAsync();
+            else
+                await _beacon.StopAsync();
 
             // Return to the dashboard.
             await Shell.Current.GoToAsync("..");

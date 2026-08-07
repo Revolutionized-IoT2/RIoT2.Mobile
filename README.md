@@ -11,6 +11,9 @@ It is the cross-platform successor to the legacy Xamarin `RIoT2.Android` app.
   **Notifications** (persisted via `Preferences`, keys preserved from the legacy app).
 - **Push notifications** — Firebase Cloud Messaging (FCM) with `alerts` and
   `notifications` topic subscriptions.
+- **BLE beacon** — periodically broadcasts an encrypted manufacturer-data
+  message over Bluetooth Low Energy. Configurable shared key, message, interval,
+  and on/off toggle (see [BLE Beacon](#ble-beacon)).
 - **MVVM** — built with `CommunityToolkit.Mvvm` (`ObservableObject`, `[ObservableProperty]`,
   `[RelayCommand]`) and Shell navigation.
 
@@ -70,6 +73,65 @@ in the **Settings** page. Values are stored with these `Preferences` keys
 | Controller URL | `textCtrlUrl` |
 | Alerts | `cbAlerts` |
 | Notifications | `cbNotifications` |
+| Beacon enabled | `beaconEnabled` |
+| Beacon shared key | `beaconKey` |
+| Beacon message | `beaconMessage` |
+| Beacon interval (seconds) | `beaconIntervalSeconds` |
+
+## BLE Beacon
+
+When enabled, the app broadcasts an encrypted BLE advertisement at the
+configured interval. All settings are configured at runtime on the **Settings**
+page (shared key, message, interval, and on/off toggle) and persisted via
+`Preferences`.
+
+### Payload
+
+Before encryption the payload is a UTF-8 string in the form:
+
+```
+{unixepoch timestamp}|{mac address}|{message}
+```
+
+- `unixepoch timestamp` — `DateTimeOffset.UtcNow.ToUnixTimeSeconds()`.
+- `mac address` — modern Android/iOS do not expose the hardware MAC, so a stable
+  per-install identifier (MAC-formatted, persisted under the `beaconDeviceId`
+  `Preferences` key) is used instead.
+- `message` — the free-text message from Settings.
+
+### Receiver Contract
+
+To decrypt the advertised manufacturer data, the receiving device must reverse
+the encryption performed by `AesCryptoService`:
+
+1. **Key derivation** — the 256-bit AES key is `SHA-256(sharedKey)`, where
+   `sharedKey` is the UTF-8 bytes of the shared key configured in Settings.
+2. **Cipher** — AES-GCM with a 12-byte nonce and 16-byte authentication tag.
+3. **Byte layout** — the raw manufacturer-data bytes are:
+
+   ```
+   [ nonce (12 bytes) ][ tag (16 bytes) ][ ciphertext (variable) ]
+   ```
+
+4. **Decrypt** — split the layout above, run AES-GCM decrypt with the derived
+   key, nonce, and tag, then UTF-8 decode the plaintext to recover the
+   `{timestamp}|{mac}|{message}` string.
+
+> **Platform note:** iOS does not support advertising custom manufacturer data.
+> On iOS the encrypted payload is Base64-encoded and carried in the
+> advertisement's local-name field instead; the receiver must Base64-decode it
+> back to the raw bytes before applying the layout above.
+
+### Background Execution (Android)
+
+On Android the beacon runs inside a **foreground service**
+(`BeaconForegroundService`) so the interval timer and BLE advertiser keep
+running while the app is backgrounded. Android requires a persistent
+notification for foreground services, so a low-importance "RIoT2 beacon active"
+notification is shown while advertising. The service is started when advertising
+begins and stopped when the beacon is turned off. This requires the
+`FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_CONNECTED_DEVICE` permissions
+(declared in `AndroidManifest.xml`).
 
 ## Firebase Console Setup
 

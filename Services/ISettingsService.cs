@@ -9,5 +9,11 @@ namespace RIoT2.Mobile.Services
         string DashboardUrl { get; set; }
         bool AlertsEnabled { get; set; }
         bool NotificationsEnabled { get; set; }
+
+        // BLE beacon
+        bool BeaconEnabled { get; set; }
+        string BeaconKey { get; set; }
+        string BeaconMessage { get; set; }
+        int BeaconIntervalSeconds { get; set; }
     }
 }

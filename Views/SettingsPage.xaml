@@ -30,6 +30,31 @@
                         IsToggled="{Binding NotificationsEnabled}" />
             </Grid>
 
+            <Label Text="BLE Beacon"
+                   FontAttributes="Bold" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Beacon enabled"
+                       VerticalOptions="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding BeaconEnabled}" />
+            </Grid>
+
+            <Label Text="Shared key" />
+            <Entry Text="{Binding BeaconKey}"
+                   IsPassword="True"
+                   Placeholder="Shared encryption key" />
+
+            <Label Text="Message" />
+            <Entry Text="{Binding BeaconMessage}"
+                   Placeholder="Message to broadcast" />
+
+            <Label Text="Interval (seconds)" />
+            <Entry Text="{Binding BeaconIntervalSeconds}"
+                   Keyboard="Numeric"
+                   Placeholder="5" />
+
             <Button Text="Save"
                     Command="{Binding SaveCommand}" />
 

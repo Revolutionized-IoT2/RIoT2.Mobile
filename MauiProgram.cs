@@ -34,6 +34,16 @@ namespace RIoT2.Mobile
             builder.Services.AddSingleton<IPushNotificationService, PushNotificationService>();
             builder.Services.AddSingleton(Connectivity.Current);
 
+            // Beacon services
+            builder.Services.AddSingleton<ICryptoService, AesCryptoService>();
+            builder.Services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
+            builder.Services.AddSingleton<IBeaconPayloadFactory, BeaconPayloadFactory>();
+#if ANDROID
+            builder.Services.AddSingleton<IBeaconService, Platforms.Android.Services.BeaconService>();
+#elif IOS
+            builder.Services.AddSingleton<IBeaconService, Platforms.iOS.Services.BeaconService>();
+#endif
+
             // ViewModels
             builder.Services.AddTransient<DashboardViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
