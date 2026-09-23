@@ -11,6 +11,23 @@ namespace RIoT2.Mobile.ViewModels
         private readonly IPushNotificationService _push;
         private readonly IBeaconService _beacon;
 
+        public bool IsBeaconSupported => _beacon.IsSupported;
+        public string? BeaconUnavailableReason => _beacon.UnavailableReason;
+
+        private string? _beaconError;
+
+        public string? BeaconError
+        {
+            get => _beaconError;
+            private set
+            {
+                if (SetProperty(ref _beaconError, value))
+                    OnPropertyChanged(nameof(HasBeaconError));
+            }
+        }
+
+        public bool HasBeaconError => !string.IsNullOrEmpty(BeaconError);
+
         [ObservableProperty]
         private string _dashboardUrl;
 
@@ -45,7 +62,8 @@ namespace RIoT2.Mobile.ViewModels
             _alertsEnabled = _settings.AlertsEnabled;
             _notificationsEnabled = _settings.NotificationsEnabled;
 
-            _beaconEnabled = _settings.BeaconEnabled;
+            _beaconEnabled = IsBeaconSupported && _settings.BeaconEnabled;
+            _beaconError = _beacon.LastError;
             _beaconKey = _settings.BeaconKey;
             _beaconMessage = _settings.BeaconMessage;
             _beaconIntervalSeconds = _settings.BeaconIntervalSeconds;
@@ -58,18 +76,26 @@ namespace RIoT2.Mobile.ViewModels
             _settings.AlertsEnabled = AlertsEnabled;
             _settings.NotificationsEnabled = NotificationsEnabled;
 
-            _settings.BeaconEnabled = BeaconEnabled;
+            _settings.BeaconEnabled = IsBeaconSupported && BeaconEnabled;
             _settings.BeaconKey = BeaconKey;
             _settings.BeaconMessage = BeaconMessage;
             _settings.BeaconIntervalSeconds = BeaconIntervalSeconds;
 
             await _push.UpdateChannelSubscriptionsAsync();
 
-            // Apply beacon settings immediately.
-            if (BeaconEnabled)
-                await _beacon.RestartAsync();
-            else
-                await _beacon.StopAsync();
+            BeaconError = null;
+            try
+            {
+                if (_settings.BeaconEnabled)
+                    await _beacon.RestartAsync();
+                else
+                    await _beacon.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                BeaconError = ex.Message;
+                return;
+            }
 
             // Return to the dashboard.
             await Shell.Current.GoToAsync("..");

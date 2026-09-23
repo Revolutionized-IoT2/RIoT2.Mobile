@@ -5,7 +5,13 @@ namespace RIoT2.Mobile.Services
     /// </summary>
     public interface IBeaconService
     {
+        bool IsSupported { get; }
+
+        string? UnavailableReason { get; }
+
         bool IsAdvertising { get; }
+
+        string? LastError { get; }
 
         Task StartAsync();
 

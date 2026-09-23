@@ -1,0 +1,20 @@
+<Project Sdk="MSTest.Sdk/3.6.1">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Services\IBeaconService.cs" Link="Services\IBeaconService.cs" />
+    <Compile Include="..\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
+    <Compile Include="..\Services\IBeaconPayloadFactory.cs" Link="Services\IBeaconPayloadFactory.cs" />
+    <Compile Include="..\Services\BeaconServiceBase.cs" Link="Services\BeaconServiceBase.cs" />
+    <Compile Include="..\Services\UnsupportedBeaconService.cs" Link="Services\UnsupportedBeaconService.cs" />
+    <Compile Include="..\Services\LegacyBeaconPayload.cs" Link="Services\LegacyBeaconPayload.cs" />
+    <Compile Include="..\Services\ICryptoService.cs" Link="Services\ICryptoService.cs" />
+    <Compile Include="..\Services\AesCryptoService.cs" Link="Services\AesCryptoService.cs" />
+    <Compile Include="..\Services\IDeviceIdentityService.cs" Link="Services\IDeviceIdentityService.cs" />
+    <Compile Include="..\Services\BeaconPayloadFactory.cs" Link="Services\BeaconPayloadFactory.cs" />
+  </ItemGroup>
+</Project>

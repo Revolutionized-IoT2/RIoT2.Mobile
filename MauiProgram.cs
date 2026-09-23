@@ -42,6 +42,8 @@ namespace RIoT2.Mobile
             builder.Services.AddSingleton<IBeaconService, Platforms.Android.Services.BeaconService>();
 #elif IOS
             builder.Services.AddSingleton<IBeaconService, Platforms.iOS.Services.BeaconService>();
+#else
+            builder.Services.AddSingleton<IBeaconService, UnsupportedBeaconService>();
 #endif
 
             // ViewModels

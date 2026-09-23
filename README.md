@@ -25,6 +25,11 @@ Actively built out of the box (see `<TargetFrameworks>` in
 - **Android** (`net9.0-android`)
 - **Windows** (`net9.0-windows10.0.19041.0`)
 
+BLE advertising is currently implemented only on Android and iOS. Windows
+registers an explicit unsupported beacon service: the beacon settings are
+disabled with an explanation, and attempts to start advertising fail rather
+than reporting success. Other settings remain available.
+
 Standard `dotnet new maui` scaffolding for **iOS**, **Mac Catalyst**, and
 **Tizen** is present under [`Platforms/`](Platforms/), but those target
 frameworks are commented out in the `.csproj` and not built by default. Add
@@ -101,6 +106,16 @@ Before encryption the payload is a UTF-8 string in the form:
 
 ### Receiver Contract
 
+**Current Android limitation:** this payload does not fit legacy BLE advertising.
+Even an empty message produces at least 57 encrypted bytes, while the current
+non-connectable advertisement permits at most 27 manufacturer-data bytes.
+Android now rejects an oversized payload with a visible Settings error instead
+of reporting the beacon as active. Advertising is marked active only after the
+platform confirms startup; startup/refresh failures stop advertising and retain
+an error for the Settings page. Startup-resume failures are also logged.
+The wire format below has not changed. A compatible transport/protocol decision
+(and receiver support) is required before Android beacon delivery can work.
+
 To decrypt the advertised manufacturer data, the receiving device must reverse
 the encryption performed by `AesCryptoService`:
 
@@ -132,6 +147,17 @@ notification is shown while advertising. The service is started when advertising
 begins and stopped when the beacon is turned off. This requires the
 `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_CONNECTED_DEVICE` permissions
 (declared in `AndroidManifest.xml`).
+
+## Offline Beacon Regression Tests
+
+The platform-independent lifecycle, unsupported-platform behavior, and payload
+size checks can be tested without MAUI, Bluetooth hardware, or Firebase:
+
+```powershell
+dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
+```
+
+These tests do not replace Android/Windows device startup and callback checks.
 
 ## Firebase Console Setup
 

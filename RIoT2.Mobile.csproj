@@ -58,6 +58,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Tests\**" />
 	  <Compile Remove="RIoT2.Android\**" />
 	  <EmbeddedResource Remove="RIoT2.Android\**" />
 	  <None Remove="RIoT2.Android\**" />

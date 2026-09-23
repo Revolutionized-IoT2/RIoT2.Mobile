@@ -33,6 +33,12 @@
             <Label Text="BLE Beacon"
                    FontAttributes="Bold" />
 
+            <Label Text="{Binding BeaconUnavailableReason}" />
+            <Label Text="{Binding BeaconError}"
+                   IsVisible="{Binding HasBeaconError}"
+                   TextColor="Red" />
+
+            <VerticalStackLayout Spacing="20" IsEnabled="{Binding IsBeaconSupported}">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0"
                        Text="Beacon enabled"
@@ -54,6 +60,7 @@
             <Entry Text="{Binding BeaconIntervalSeconds}"
                    Keyboard="Numeric"
                    Placeholder="5" />
+            </VerticalStackLayout>
 
             <Button Text="Save"
                     Command="{Binding SaveCommand}" />

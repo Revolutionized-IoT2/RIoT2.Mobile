@@ -40,7 +40,8 @@ namespace RIoT2.Mobile.Platforms.Android.Services
                 .GetSystemService(Context.BluetoothService);
 
             _advertiser = manager?.Adapter?.BluetoothLeAdvertiser;
-            _callback = new BeaconAdvertiseCallback();
+            if (_advertiser is null)
+                throw new InvalidOperationException("Bluetooth advertising is unavailable. Enable Bluetooth and check device support.");
 
             // Keep the process alive while advertising in the background.
             BeaconForegroundService.Start();
@@ -48,10 +49,13 @@ namespace RIoT2.Mobile.Platforms.Android.Services
             return Task.CompletedTask;
         }
 
-        protected override Task OnAdvertiseAsync(byte[] manufacturerData)
+        protected override void ValidatePayload(byte[] manufacturerData)
+            => LegacyBeaconPayload.Validate(manufacturerData);
+
+        protected override async Task OnAdvertiseAsync(byte[] manufacturerData)
         {
-            if (_advertiser is null || _callback is null)
-                return Task.CompletedTask;
+            if (_advertiser is null)
+                throw new InvalidOperationException("Bluetooth advertiser is not initialized.");
 
             var settings = new AdvertiseSettings.Builder()
                 .SetAdvertiseMode(AdvertiseMode.LowLatency)!
@@ -65,29 +69,42 @@ namespace RIoT2.Mobile.Platforms.Android.Services
                 .Build();
 
             // Restart advertising so the refreshed payload takes effect.
-            _advertiser.StopAdvertising(_callback);
+            if (_callback is not null)
+                _advertiser.StopAdvertising(_callback);
+            var callback = new BeaconAdvertiseCallback();
+            _callback = callback;
             _advertiser.StartAdvertising(settings, data, _callback);
-
-            return Task.CompletedTask;
+            await callback.Completion.WaitAsync(TimeSpan.FromSeconds(10));
         }
 
         protected override Task OnStopAdvertisingAsync()
         {
-            if (_advertiser is not null && _callback is not null)
-                _advertiser.StopAdvertising(_callback);
-
-            _advertiser = null;
-            _callback = null;
-
-            BeaconForegroundService.Stop();
+            try
+            {
+                if (_advertiser is not null && _callback is not null)
+                    _advertiser.StopAdvertising(_callback);
+            }
+            finally
+            {
+                _advertiser = null;
+                _callback = null;
+                BeaconForegroundService.Stop();
+            }
 
             return Task.CompletedTask;
         }
 
         private sealed class BeaconAdvertiseCallback : AdvertiseCallback
         {
+            private readonly TaskCompletionSource _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public Task Completion => _completion.Task;
+
+            public override void OnStartSuccess(AdvertiseSettings? settingsInEffect)
+                => _completion.TrySetResult();
+
             public override void OnStartFailure(AdvertiseFailure errorCode)
-                => base.OnStartFailure(errorCode);
+                => _completion.TrySetException(new InvalidOperationException($"Bluetooth advertising failed: {errorCode}."));
         }
     }
 
