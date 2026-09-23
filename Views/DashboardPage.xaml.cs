@@ -5,6 +5,8 @@ namespace RIoT2.Mobile.Views
     public partial class DashboardPage : ContentPage
     {
         private readonly DashboardViewModel _viewModel;
+        private CancellationTokenSource? _navigationTimeout;
+        private bool _showingError;
 
         public DashboardPage(DashboardViewModel viewModel)
         {
@@ -16,18 +18,42 @@ namespace RIoT2.Mobile.Views
         private void OnNavigating(object? sender, WebNavigatingEventArgs e)
         {
             _viewModel.IsLoading = true;
+            StartNavigationTimeout();
         }
 
         private void OnNavigated(object? sender, WebNavigatedEventArgs e)
         {
-            _viewModel.IsLoading = false;
+            CancelNavigationTimeout();
+            _viewModel.CompleteNavigation();
 
-            // Dismiss the pull-to-refresh spinner once the page finishes loading.
-            _viewModel.IsRefreshing = false;
+            if (e.Result != WebNavigationResult.Success && !_showingError)
+                ShowError();
+        }
 
-            if (e.Result != WebNavigationResult.Success)
+        private void OnRefreshRequested(object? sender, EventArgs e)
+        {
+            try
             {
-                // Show a local error page, mirroring the legacy error.html behavior.
+                _showingError = false;
+                StartNavigationTimeout();
+                if (Web.Source is UrlWebViewSource current && current.Url == _viewModel.Source)
+                    Web.Reload();
+                else
+                    Web.Source = new UrlWebViewSource { Url = _viewModel.Source };
+            }
+            catch
+            {
+                ShowError();
+            }
+        }
+
+        private void ShowError()
+        {
+            CancelNavigationTimeout();
+            _viewModel.CompleteNavigation();
+            _showingError = true;
+            try
+            {
                 Web.Source = new HtmlWebViewSource
                 {
                     Html = "<html><body style='font-family:sans-serif;text-align:center;padding-top:40px'>" +
@@ -36,12 +62,47 @@ namespace RIoT2.Mobile.Views
                            "</body></html>"
                 };
             }
+            catch { _viewModel.CompleteNavigation(); }
+        }
+
+        private void StartNavigationTimeout()
+        {
+            CancelNavigationTimeout();
+            _navigationTimeout = new CancellationTokenSource();
+            _ = CompleteAfterTimeoutAsync(_navigationTimeout.Token);
+        }
+
+        private async Task CompleteAfterTimeoutAsync(CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), token);
+                if (!token.IsCancellationRequested)
+                    _viewModel.CompleteNavigation();
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        }
+
+        private void CancelNavigationTimeout()
+        {
+            _navigationTimeout?.Cancel();
+            _navigationTimeout?.Dispose();
+            _navigationTimeout = null;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            _viewModel.RefreshRequested += OnRefreshRequested;
+            _viewModel.Activate();
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _viewModel.Dispose();
+            _viewModel.RefreshRequested -= OnRefreshRequested;
+            _viewModel.Deactivate();
+            CancelNavigationTimeout();
         }
     }
 }

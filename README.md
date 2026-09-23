@@ -69,6 +69,13 @@ AppShell.xaml       Shell navigation host and route registration
 
 ## Configuration
 
+Dashboard refresh explicitly reloads the WebView even when the URL is unchanged,
+and restores URL content after a local error page. Returning from Settings applies
+an updated controller URL. Connectivity recovery subscriptions are reattached when
+the dashboard reappears. Loading/refresh indicators stop on completion, failure,
+disappearance, connectivity loss, or after a 30-second navigation timeout; this
+timeout dismisses indicators without cancelling an eventual page load.
+
 The default controller URL and notification toggles can be changed at runtime
 in the **Settings** page. Values are stored with these `Preferences` keys
 (kept identical to the legacy app):
@@ -148,16 +155,21 @@ begins and stopped when the beacon is turned off. This requires the
 `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_CONNECTED_DEVICE` permissions
 (declared in `AndroidManifest.xml`).
 
-## Offline Beacon Regression Tests
+## Offline Client Regression Tests
 
-The platform-independent lifecycle, unsupported-platform behavior, and payload
-size checks can be tested without MAUI, Bluetooth hardware, or Firebase:
+The beacon lifecycle, unsupported-platform behavior, and payload size checks,
+plus dashboard refresh/recovery and indicator state, can be tested without
+Bluetooth hardware, Firebase, or a running web server:
 
 ```powershell
 dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
 ```
 
-These tests do not replace Android/Windows device startup and callback checks.
+Dashboard tests source-link the real view model and page code with headless MAUI
+API stand-ins. They cover explicit same-URL reloads, recovery from local error
+content, completion/failure, returning from Settings, deep-link preservation,
+and connectivity recovery after revisiting the page.
+These tests do not replace Android/Windows WebView, startup, and callback checks.
 
 ## Firebase Console Setup
 

@@ -10,6 +10,10 @@ namespace RIoT2.Mobile.ViewModels
     {
         private readonly ISettingsService _settings;
         private readonly IConnectivity _connectivity;
+        private string _settingsUrl;
+        private bool _active;
+
+        public event EventHandler? RefreshRequested;
 
         [ObservableProperty]
         private string _source;
@@ -28,17 +32,73 @@ namespace RIoT2.Mobile.ViewModels
             _settings = settings;
             _connectivity = connectivity;
             _source = _settings.DashboardUrl;
+            _settingsUrl = _source;
 
             _isConnected = _connectivity.NetworkAccess == NetworkAccess.Internet;
-            _connectivity.ConnectivityChanged += OnConnectivityChanged;
         }
 
         /// <summary>Reloads the dashboard using the latest saved URL.</summary>
         [RelayCommand]
         private void Refresh()
         {
-            // Reassigning Source forces the WebView to reload the (possibly updated) URL.
-            Source = _settings.DashboardUrl;
+            _settingsUrl = _settings.DashboardUrl;
+            if (Source != _settingsUrl)
+                Source = _settingsUrl;
+            else
+                RequestRefresh();
+        }
+
+        partial void OnSourceChanged(string value)
+        {
+            if (_active)
+                RequestRefresh();
+        }
+
+        private void RequestRefresh()
+        {
+            if (!_active || RefreshRequested is null)
+            {
+                CompleteNavigation();
+                return;
+            }
+
+            IsLoading = true;
+            IsRefreshing = true;
+            try { RefreshRequested.Invoke(this, EventArgs.Empty); }
+            catch
+            {
+                CompleteNavigation();
+                throw;
+            }
+        }
+
+        public void CompleteNavigation()
+        {
+            IsLoading = false;
+            IsRefreshing = false;
+        }
+
+        public void Activate()
+        {
+            if (_active)
+                return;
+
+            if (_settingsUrl != _settings.DashboardUrl)
+            {
+                _settingsUrl = _settings.DashboardUrl;
+                Source = _settingsUrl;
+            }
+            IsConnected = _connectivity.NetworkAccess == NetworkAccess.Internet;
+            _connectivity.ConnectivityChanged += OnConnectivityChanged;
+            _active = true;
+            RequestRefresh();
+        }
+
+        public void Deactivate()
+        {
+            _active = false;
+            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
+            CompleteNavigation();
         }
 
         [RelayCommand]
@@ -49,20 +109,22 @@ namespace RIoT2.Mobile.ViewModels
 
         private void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
         {
-            var wasConnected = IsConnected;
-            IsConnected = e.NetworkAccess == NetworkAccess.Internet;
-
-            // Auto-reload the dashboard when connectivity is restored, so the
-            // user doesn't have to manually refresh after losing the network.
-            if (!wasConnected && IsConnected)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                Refresh();
-            }
+                if (!_active)
+                    return;
+                var wasConnected = IsConnected;
+                IsConnected = e.NetworkAccess == NetworkAccess.Internet;
+                if (!wasConnected && IsConnected)
+                    RequestRefresh();
+                else if (!IsConnected)
+                    CompleteNavigation();
+            });
         }
 
         public void Dispose()
         {
-            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
+            Deactivate();
         }
     }
 }

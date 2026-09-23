@@ -6,6 +6,11 @@
     <UseVSTest>true</UseVSTest>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\ViewModels\DashboardViewModel.cs" Link="ViewModels\DashboardViewModel.cs" />
+    <Compile Include="..\Views\DashboardPage.xaml.cs" Link="Views\DashboardPage.xaml.cs" />
     <Compile Include="..\Services\IBeaconService.cs" Link="Services\IBeaconService.cs" />
     <Compile Include="..\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
     <Compile Include="..\Services\IBeaconPayloadFactory.cs" Link="Services\IBeaconPayloadFactory.cs" />
