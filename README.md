@@ -62,7 +62,8 @@ AppShell.xaml       Shell navigation host and route registration
 
    ```bash
    dotnet restore
-   dotnet build -f net9.0-android
+   dotnet build .\RIoT2.Mobile.csproj -f net9.0-android
+   dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
    ```
 
 4. Select a target (Android/Windows) in Visual Studio and run.
@@ -76,7 +77,8 @@ the dashboard reappears. Loading/refresh indicators stop on completion, failure,
 disappearance, connectivity loss, or after a 30-second navigation timeout; this
 timeout dismisses indicators without cancelling an eventual page load.
 
-The default controller URL and notification toggles can be changed at runtime
+The default controller URL is HTTP and intended for local/LAN development; use
+HTTPS for production dashboards where possible. The default controller URL and notification toggles can be changed at runtime
 in the **Settings** page. Values are stored with these `Preferences` keys
 (kept identical to the legacy app):
 
@@ -96,6 +98,10 @@ When enabled, the app broadcasts an encrypted BLE advertisement at the
 configured interval. All settings are configured at runtime on the **Settings**
 page (shared key, message, interval, and on/off toggle) and persisted via
 `Preferences`.
+
+`Preferences` is convenient for compatibility with the legacy app, but it is not
+encrypted storage. Move the beacon shared key to `SecureStorage` before using it
+as a production secret.
 
 ### Payload
 
@@ -163,6 +169,7 @@ Bluetooth hardware, Firebase, or a running web server:
 
 ```powershell
 dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
+dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
 ```
 
 Dashboard tests source-link the real view model and page code with headless MAUI
@@ -187,7 +194,10 @@ Push notifications require a Firebase project and platform config files.
    > Change this to a real identifier before publishing to the Play Store — it
    > cannot be changed later. Update both the `.csproj` and Firebase to match.
 3. Click **Register app** and **download `google-services.json`**.
-4. Place the file at `Platforms/Android/google-services.json`.
+4. Place the file at `Platforms/Android/google-services.json`. Firebase client
+   config is not a server secret, but restrict its API key/package/certificate
+   in Google Cloud/Firebase before publishing and avoid committing environment-
+   specific production configs to public repositories.
 5. Confirm its **Build Action** is `GoogleServicesJson` (already wired in the `.csproj`).
 
 ### 3. Register the iOS App (optional, requires enabling `net9.0-ios` in the `.csproj`)
