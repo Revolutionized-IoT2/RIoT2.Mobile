@@ -1,255 +1,129 @@
-﻿# RIoT2.Mobile
+# RIoT2.Mobile
 
-Mobile application for the **RIoT2** system, built with **.NET MAUI (.NET 9)**.
-It is the cross-platform successor to the legacy Xamarin `RIoT2.Android` app.
+.NET MAUI client app for the [RIoT2](https://github.com/Revolutionized-IoT2) IoT platform. It hosts
+the RIoT2 web dashboard in a native `WebView`, manages Firebase Cloud Messaging topic
+subscriptions, and includes a BLE beacon implementation for Android/iOS-oriented scenarios.
+
+- Type: .NET MAUI app
+- Target frameworks: `net9.0-android`, `net9.0-windows10.0.19041.0`
+- App id: `com.riot.jsuutari.riotmessanger`
+
+How this app fits into the platform: [architecture overview](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/architecture/overview.md).
 
 ## Features
 
-- **Dashboard** — hosts the RIoT2 web dashboard in a `WebView` with a loading
-  indicator, pull-to-refresh, connectivity tracking, and a friendly offline/error page.
-- **Settings** — configure the controller URL and toggle **Alerts** /
-  **Notifications** (persisted via `Preferences`, keys preserved from the legacy app).
-- **Push notifications** — Firebase Cloud Messaging (FCM) with `alerts` and
-  `notifications` topic subscriptions.
-- **BLE beacon** — periodically broadcasts an encrypted manufacturer-data
-  message over Bluetooth Low Energy. Configurable shared key, message, interval,
-  and on/off toggle (see [BLE Beacon](#ble-beacon)).
-- **MVVM** — built with `CommunityToolkit.Mvvm` (`ObservableObject`, `[ObservableProperty]`,
-  `[RelayCommand]`) and Shell navigation.
-
-## Supported Platforms
-
-Actively built out of the box (see `<TargetFrameworks>` in
-[`RIoT2.Mobile.csproj`](RIoT2.Mobile.csproj)):
-
-- **Android** (`net9.0-android`)
-- **Windows** (`net9.0-windows10.0.19041.0`)
-
-BLE advertising is currently implemented only on Android and iOS. Windows
-registers an explicit unsupported beacon service: the beacon settings are
-disabled with an explanation, and attempts to start advertising fail rather
-than reporting success. Other settings remain available.
-
-Standard `dotnet new maui` scaffolding for **iOS**, **Mac Catalyst**, and
-**Tizen** is present under [`Platforms/`](Platforms/), but those target
-frameworks are commented out in the `.csproj` and not built by default. Add
-them back to `<TargetFrameworks>` to enable those platforms.
+- **Dashboard**: displays the configured dashboard URL in a MAUI `WebView` with loading state,
+  pull-to-refresh, connectivity recovery and a local error page.
+- **Settings**: lets the user edit the dashboard/controller URL and toggle `alerts` and
+  `notifications` FCM topic subscriptions.
+- **Push notifications**: initializes Firebase Cloud Messaging, subscribes or unsubscribes from
+  the `alerts` and `notifications` topics, and supports notification deep links with `route` and
+  `url` data payload keys.
+- **BLE beacon**: encrypts a timestamp, per-install device id and message, then advertises the
+  payload on supported platforms.
 
 ## Requirements
 
-- Visual Studio 2022 with the **.NET Multi-platform App UI development** workload.
-- .NET 9 SDK (see [`global.json`](global.json)).
-- A Firebase project (see [Firebase Setup](#firebase-console-setup)).
+- Visual Studio 2022 with the .NET Multi-platform App UI workload.
+- .NET 9 SDK (`global.json` requests 9.0.100 with `latestFeature` roll-forward).
+- A Firebase project and Android `google-services.json` for push notifications.
 
-## Project Structure
+## Build and test
 
-```
-Platforms/        Platform-specific entry points (Android, iOS, MacCatalyst, Tizen, Windows)
-Resources/         Fonts, images, app icon, splash screen, and styles
-Services/           IPushNotificationService / PushNotificationService (FCM)
-                    ISettingsService / SettingsService (Preferences-backed settings)
-ViewModels/        DashboardViewModel, SettingsViewModel (CommunityToolkit.Mvvm)
-Views/             DashboardPage, SettingsPage (XAML)
-MauiProgram.cs      App startup: DI registration, fonts, Firebase, ViewModel/Page registration
-AppShell.xaml       Shell navigation host and route registration
+From the repository root (`C:\Src\RIoT2\RIoT2.Mobile`):
+
+```powershell
+dotnet restore .\RIoT2.Mobile.sln
+dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
+dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
+dotnet build .\RIoT2.Mobile.csproj -f net9.0-android
 ```
 
-## Getting Started
+The tests are offline client regressions. They source-link the real dashboard view model, dashboard
+page and beacon services into `Tests/RIoT2.Mobile.Tests.csproj` with headless MAUI stand-ins, so
+they do not require Bluetooth hardware, Firebase or a running dashboard.
 
-1. Clone the repository.
-2. Complete the [Firebase setup](#firebase-console-setup) below.
-3. Restore and build:
+`Directory.Build.props` writes outputs to `C:\b\RIoT2.Mobile` and intermediates to
+`C:\o\RIoT2.Mobile`. Plan
+[M8](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/plans/m08-dotnet10-migration.md)
+tracks making those paths portable during the .NET 10 migration.
 
-   ```bash
-   dotnet restore
-   dotnet build .\RIoT2.Mobile.csproj -f net9.0-android
-   dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
-   ```
+## Run
 
-4. Select a target (Android/Windows) in Visual Studio and run.
+Open `RIoT2.Mobile.sln` in Visual Studio, select an Android or Windows target, and run. Android
+push notifications require `Platforms/Android/google-services.json` with build action
+`GoogleServicesJson`.
 
 ## Configuration
 
-Dashboard refresh explicitly reloads the WebView even when the URL is unchanged,
-and restores URL content after a local error page. Returning from Settings applies
-an updated controller URL. Connectivity recovery subscriptions are reattached when
-the dashboard reappears. Loading/refresh indicators stop on completion, failure,
-disappearance, connectivity loss, or after a 30-second navigation timeout; this
-timeout dismisses indicators without cancelling an eventual page load.
+Settings are stored with `Microsoft.Maui.Storage.Preferences` using keys preserved from the legacy
+Xamarin app:
 
-The default controller URL is HTTP and intended for local/LAN development; use
-HTTPS for production dashboards where possible. The default controller URL and notification toggles can be changed at runtime
-in the **Settings** page. Values are stored with these `Preferences` keys
-(kept identical to the legacy app):
-
-| Setting | Key |
+| Setting | Preference key |
 |---|---|
-| Controller URL | `textCtrlUrl` |
-| Alerts | `cbAlerts` |
-| Notifications | `cbNotifications` |
+| Dashboard URL | `textCtrlUrl` |
+| Alerts topic enabled | `cbAlerts` |
+| Notifications topic enabled | `cbNotifications` |
 | Beacon enabled | `beaconEnabled` |
 | Beacon shared key | `beaconKey` |
 | Beacon message | `beaconMessage` |
-| Beacon interval (seconds) | `beaconIntervalSeconds` |
+| Beacon interval seconds | `beaconIntervalSeconds` |
 
-## BLE Beacon
+The default dashboard URL in `Services/SettingsService.cs` is an HTTP LAN URL for local
+development. Change it in the Settings page before using the app outside that environment.
 
-When enabled, the app broadcasts an encrypted BLE advertisement at the
-configured interval. All settings are configured at runtime on the **Settings**
-page (shared key, message, interval, and on/off toggle) and persisted via
-`Preferences`.
+The app does not connect to MQTT directly. The dashboard loaded in the `WebView` is responsible for
+its own MQTT and orchestrator API communication. Platform source-of-truth docs:
 
-`Preferences` is convenient for compatibility with the legacy app, but it is not
-encrypted storage. Move the beacon shared key to `SecureStorage` before using it
-as a production secret.
+- [MQTT topics and payloads](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/contracts/mqtt-topics.md)
+- [HTTP and gRPC APIs](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/contracts/http-api.md)
+- [Environment variables, ports, volumes and images](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/contracts/env-vars.md)
 
-### Payload
+## Firebase setup
 
-Before encryption the payload is a UTF-8 string in the form:
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com).
+2. Register an Android app whose package name matches `<ApplicationId>` in `RIoT2.Mobile.csproj`.
+3. Download `google-services.json` and place it at `Platforms/Android/google-services.json`.
+4. Restrict the Firebase API key by Android package name and signing certificate before publishing.
+5. Send test messages to the `alerts` or `notifications` topic.
 
-```
-{unixepoch timestamp}|{mac address}|{message}
-```
+Firebase client configuration is not a server secret, but production project files are still
+environment-specific. Do not commit real production Firebase configuration to a public repository.
 
-- `unixepoch timestamp` — `DateTimeOffset.UtcNow.ToUnixTimeSeconds()`.
-- `mac address` — modern Android/iOS do not expose the hardware MAC, so a stable
-  per-install identifier (MAC-formatted, persisted under the `beaconDeviceId`
-  `Preferences` key) is used instead.
-- `message` — the free-text message from Settings.
+## BLE beacon
 
-### Receiver Contract
+When enabled, the app periodically builds this plaintext payload:
 
-**Current Android limitation:** this payload does not fit legacy BLE advertising.
-Even an empty message produces at least 57 encrypted bytes, while the current
-non-connectable advertisement permits at most 27 manufacturer-data bytes.
-Android now rejects an oversized payload with a visible Settings error instead
-of reporting the beacon as active. Advertising is marked active only after the
-platform confirms startup; startup/refresh failures stop advertising and retain
-an error for the Settings page. Startup-resume failures are also logged.
-The wire format below has not changed. A compatible transport/protocol decision
-(and receiver support) is required before Android beacon delivery can work.
-
-To decrypt the advertised manufacturer data, the receiving device must reverse
-the encryption performed by `AesCryptoService`:
-
-1. **Key derivation** — the 256-bit AES key is `SHA-256(sharedKey)`, where
-   `sharedKey` is the UTF-8 bytes of the shared key configured in Settings.
-2. **Cipher** — AES-GCM with a 12-byte nonce and 16-byte authentication tag.
-3. **Byte layout** — the raw manufacturer-data bytes are:
-
-   ```
-   [ nonce (12 bytes) ][ tag (16 bytes) ][ ciphertext (variable) ]
-   ```
-
-4. **Decrypt** — split the layout above, run AES-GCM decrypt with the derived
-   key, nonce, and tag, then UTF-8 decode the plaintext to recover the
-   `{timestamp}|{mac}|{message}` string.
-
-> **Platform note:** iOS does not support advertising custom manufacturer data.
-> On iOS the encrypted payload is Base64-encoded and carried in the
-> advertisement's local-name field instead; the receiver must Base64-decode it
-> back to the raw bytes before applying the layout above.
-
-### Background Execution (Android)
-
-On Android the beacon runs inside a **foreground service**
-(`BeaconForegroundService`) so the interval timer and BLE advertiser keep
-running while the app is backgrounded. Android requires a persistent
-notification for foreground services, so a low-importance "RIoT2 beacon active"
-notification is shown while advertising. The service is started when advertising
-begins and stopped when the beacon is turned off. This requires the
-`FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_CONNECTED_DEVICE` permissions
-(declared in `AndroidManifest.xml`).
-
-## Offline Client Regression Tests
-
-The beacon lifecycle, unsupported-platform behavior, and payload size checks,
-plus dashboard refresh/recovery and indicator state, can be tested without
-Bluetooth hardware, Firebase, or a running web server:
-
-```powershell
-dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
-dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
+```text
+{unixepoch timestamp}|{device id}|{message}
 ```
 
-Dashboard tests source-link the real view model and page code with headless MAUI
-API stand-ins. They cover explicit same-URL reloads, recovery from local error
-content, completion/failure, returning from Settings, deep-link preservation,
-and connectivity recovery after revisiting the page.
-These tests do not replace Android/Windows WebView, startup, and callback checks.
+`Services/AesCryptoService.cs` encrypts it with AES-GCM. The AES-256 key is `SHA-256(sharedKey)`,
+and the advertised byte layout is:
 
-## Firebase Console Setup
+```text
+[ nonce (12 bytes) ][ tag (16 bytes) ][ ciphertext ]
+```
 
-Push notifications require a Firebase project and platform config files.
+Android advertises the encrypted bytes as manufacturer data with manufacturer id `0xFFFF`, starts a
+foreground service while advertising, and validates the legacy BLE payload size before reporting
+success. iOS base64-encodes the encrypted bytes in the advertisement local-name field because iOS
+does not allow arbitrary manufacturer data. Windows uses `UnsupportedBeaconService`, so beacon
+settings are disabled and attempts to start advertising fail explicitly.
 
-### 1. Create a Firebase Project
+`Preferences` is not encrypted storage. Move `beaconKey` to `SecureStorage` before treating it as a
+production secret.
 
-1. Go to [console.firebase.google.com](https://console.firebase.google.com).
-2. **Add project** → name it (e.g., `RIoT2`) → **Create project**.
+## Releases
 
-### 2. Register the Android App
+Release notes are in [CHANGELOG.md](CHANGELOG.md). This repository currently has no tag-driven
+release workflow.
 
-1. In the project overview, click the **Android** icon (**Add app**).
-2. **Android package name** — must match `<ApplicationId>` in [`RIoT2.Mobile.csproj`](RIoT2.Mobile.csproj) (currently `com.riot.jsuutari.riotmessanger`).
-   > Change this to a real identifier before publishing to the Play Store — it
-   > cannot be changed later. Update both the `.csproj` and Firebase to match.
-3. Click **Register app** and **download `google-services.json`**.
-4. Place the file at `Platforms/Android/google-services.json`. Firebase client
-   config is not a server secret, but restrict its API key/package/certificate
-   in Google Cloud/Firebase before publishing and avoid committing environment-
-   specific production configs to public repositories.
-5. Confirm its **Build Action** is `GoogleServicesJson` (already wired in the `.csproj`).
+## Contributing
 
-### 3. Register the iOS App (optional, requires enabling `net9.0-ios` in the `.csproj`)
+- Instructions for AI coding agents: [AGENTS.md](AGENTS.md).
+- Platform documentation: [.github/docs](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/README.md).
 
-1. Click **Add app** → **iOS** icon.
-2. **Apple bundle ID** — match the iOS bundle identifier (same `ApplicationId`).
-3. **Register app** and **download `GoogleService-Info.plist`**.
-4. Place the file at `Platforms/iOS/GoogleService-Info.plist`
-   (Build Action `BundleResource`, already wired in the `.csproj`.)
-5. **Upload an APNs authentication key** (required for iOS push):
-   - Firebase → **Project settings** → **Cloud Messaging** → **Apple app
-     configuration** → **APNs Authentication Key**.
-   - Upload the `.p8` key (created in the Apple Developer portal with the
-     **Apple Push Notifications service** capability), plus the **Key ID** and **Team ID**.
-   - Enable the **Push Notifications** capability and add `aps-environment`
-     to `Platforms/iOS/Entitlements.plist`.
+## License
 
-### 4. Enable Cloud Messaging
-
-Verify **Project settings → Cloud Messaging** shows the
-**Cloud Messaging API (V1)** enabled (Plugin.Firebase uses V1).
-
-### 5. Topics
-
-The `alerts` and `notifications` topics are created **automatically** the first
-time a device subscribes — no console configuration required.
-
-### 6. Send a Test Message
-
-1. Firebase console → **Messaging** → **Create your first campaign** →
-   **Firebase Notification messages**.
-2. Enter a title and body.
-3. **Target** → **Topic** → select `alerts` or `notifications`.
-4. **Review** → **Publish** and confirm the device receives it.
-
-To test a single device, copy the FCM token printed in the debug output
-(logged by `PushNotificationService.InitializeAsync`) and use
-**Send test message**.
-
-### Verification Checklist
-
-| Item | Done |
-|---|---|
-| `google-services.json` in `Platforms/Android/` (Build Action `GoogleServicesJson`) | ☐ |
-| `GoogleService-Info.plist` in `Platforms/iOS/` (iOS only) | ☐ |
-| Package/bundle ID matches `<ApplicationId>` | ☐ |
-| APNs key uploaded (iOS only) | ☐ |
-| App launches, permission prompt appears, FCM token logged | ☐ |
-| Test message to `alerts` topic received | ☐ |
-
-## Migration Notes
-
-This app replaces the legacy Xamarin `RIoT2.Android` project. `Preferences`
-keys for settings (see [Configuration](#configuration)) are kept identical to
-the legacy app so existing user data carries over on upgrade.
+See [LICENSE](LICENSE).
