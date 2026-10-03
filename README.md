@@ -5,7 +5,7 @@ the RIoT2 web dashboard in a native `WebView`, manages Firebase Cloud Messaging 
 subscriptions, and includes a BLE beacon implementation for Android/iOS-oriented scenarios.
 
 - Type: .NET MAUI app
-- Target frameworks: `net9.0-android`, `net9.0-windows10.0.19041.0`
+- Target frameworks: `net10.0-android`, `net10.0-windows10.0.19041.0`
 - App id: `com.riot.jsuutari.riotmessanger`
 
 How this app fits into the platform: [architecture overview](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/architecture/overview.md).
@@ -25,7 +25,9 @@ How this app fits into the platform: [architecture overview](https://github.com/
 ## Requirements
 
 - Visual Studio 2022 with the .NET Multi-platform App UI workload.
-- .NET 9 SDK (`global.json` requests 9.0.100 with `latestFeature` roll-forward).
+- .NET 10 SDK (`global.json` requests 10.0.100 with `latestFeature` roll-forward) and the MAUI 10
+  workload.
+- Android SDK platform API 36 for `net10.0-android` builds.
 - A Firebase project and Android `google-services.json` for push notifications.
 
 ## Build and test
@@ -35,18 +37,17 @@ From the repository root (`C:\Src\RIoT2\RIoT2.Mobile`):
 ```powershell
 dotnet restore .\RIoT2.Mobile.sln
 dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
-dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
-dotnet build .\RIoT2.Mobile.csproj -f net9.0-android
+dotnet build .\RIoT2.Mobile.csproj -f net10.0-windows10.0.19041.0
+dotnet build .\RIoT2.Mobile.csproj -f net10.0-android
 ```
 
 The tests are offline client regressions. They source-link the real dashboard view model, dashboard
 page and beacon services into `Tests/RIoT2.Mobile.Tests.csproj` with headless MAUI stand-ins, so
 they do not require Bluetooth hardware, Firebase or a running dashboard.
 
-`Directory.Build.props` writes outputs to `C:\b\RIoT2.Mobile` and intermediates to
-`C:\o\RIoT2.Mobile`. Plan
-[M8](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/plans/m08-dotnet10-migration.md)
-tracks making those paths portable during the .NET 10 migration.
+`Directory.Build.repo.props`, imported by the shared `Directory.Build.props`, writes intermediates
+to `<repo>\obj\<ProjectName>\` and outputs to `<repo>\bin\<ProjectName>\` while preserving excludes
+for local `obj`, `bin` and `.vs` folders.
 
 ## Run
 

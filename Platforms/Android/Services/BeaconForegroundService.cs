@@ -43,13 +43,14 @@ namespace RIoT2.Mobile.Platforms.Android.Services
         {
             CreateNotificationChannel();
 
-            var notification = new NotificationCompat.Builder(this, ChannelId)
-                .SetContentTitle("RIoT2 beacon active")
-                .SetContentText("Broadcasting BLE beacon.")
-                .SetSmallIcon(global::Android.Resource.Drawable.StatSysDataBluetooth)
-                .SetOngoing(true)
-                .SetPriority((int)NotificationPriority.Low)
-                .Build();
+            var builder = new NotificationCompat.Builder(this, ChannelId);
+            builder.SetContentTitle("RIoT2 beacon active");
+            builder.SetContentText("Broadcasting BLE beacon.");
+            builder.SetSmallIcon(global::Android.Resource.Drawable.StatSysDataBluetooth);
+            builder.SetOngoing(true);
+            builder.SetPriority((int)NotificationPriority.Low);
+            var notification = builder.Build()
+                ?? throw new InvalidOperationException("Could not build the beacon notification.");
 
             if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {

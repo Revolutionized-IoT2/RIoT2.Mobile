@@ -68,8 +68,8 @@ namespace RIoT2.Mobile
 #if ANDROID
                 events.AddAndroid(android => android.OnCreate((activity, _) =>
                     CrossFirebase.Initialize(
-                        Android.App.Application.Context as Android.App.Activity,
-                        () => Platform.CurrentActivity)));
+                        activity,
+                        () => Platform.CurrentActivity ?? activity)));
 #elif IOS
                 events.AddiOS(ios => ios.FinishedLaunching((app, launchOptions) =>
                 {

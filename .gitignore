@@ -6,6 +6,7 @@
 /.vs
 /obj/Debug
 /obj
+/bin
 /Tests/bin/
 /Tests/obj/
 /Tests/TestResults/

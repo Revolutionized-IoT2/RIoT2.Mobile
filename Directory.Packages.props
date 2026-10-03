@@ -1,0 +1,16 @@
+<Project>
+  <!-- Central package versions (plan M8 step 2). Shared versions come from
+       Revolutionized-IoT2/.github build/Directory.Packages.props.template. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
+    <!-- CommunityToolkit.Maui 15 needs Microsoft.Maui.Controls 10.0.90 or later. -->
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.110" />
+    <!-- No net10.0 build yet; the net9.0-android assets are consumed from net10.0-android. -->
+    <PackageVersion Include="Plugin.Firebase.CloudMessaging" Version="4.0.1" />
+  </ItemGroup>
+</Project>

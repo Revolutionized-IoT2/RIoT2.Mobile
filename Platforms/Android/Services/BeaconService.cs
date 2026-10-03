@@ -108,13 +108,17 @@ namespace RIoT2.Mobile.Platforms.Android.Services
         }
     }
 
-    /// <summary>Runtime permission wrapper for BLUETOOTH_ADVERTISE.</summary>
+    /// <summary>Runtime permission wrapper for BLUETOOTH_ADVERTISE. Before Android 12 (API 31) these
+    /// permissions don't exist and advertising is covered by the install-time Bluetooth permissions.</summary>
     public class BluetoothAdvertisePermission : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
-        [
-            (global::Android.Manifest.Permission.BluetoothAdvertise, true),
-            (global::Android.Manifest.Permission.BluetoothConnect, true),
-        ];
+            OperatingSystem.IsAndroidVersionAtLeast(31)
+                ?
+                [
+                    (global::Android.Manifest.Permission.BluetoothAdvertise, true),
+                    (global::Android.Manifest.Permission.BluetoothConnect, true),
+                ]
+                : [];
     }
 }

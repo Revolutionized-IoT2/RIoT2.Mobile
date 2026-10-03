@@ -8,7 +8,7 @@ workspace map, platform-wide rules and the documentation rules. In the local wor
 
 ## What this is
 
-A .NET 9 MAUI app for Android and Windows. It hosts the RIoT2 UI dashboard in a `WebView`,
+A .NET 10 MAUI app for Android and Windows. It hosts the RIoT2 UI dashboard in a `WebView`,
 manages Firebase Cloud Messaging topic subscriptions, and contains a BLE beacon implementation
 that is supported on Android/iOS service classes and explicitly unsupported elsewhere.
 
@@ -19,18 +19,19 @@ Run from the repository root (`C:\Src\RIoT2\RIoT2.Mobile`), in PowerShell:
 ```powershell
 dotnet restore .\RIoT2.Mobile.sln
 dotnet test .\Tests\RIoT2.Mobile.Tests.csproj
-dotnet build .\RIoT2.Mobile.csproj -f net9.0-windows10.0.19041.0
-dotnet build .\RIoT2.Mobile.csproj -f net9.0-android
+dotnet build .\RIoT2.Mobile.csproj -f net10.0-windows10.0.19041.0
+dotnet build .\RIoT2.Mobile.csproj -f net10.0-android
 ```
 
-- `RIoT2.Mobile.csproj` targets `net9.0-android` and `net9.0-windows10.0.19041.0`.
-- `Tests/RIoT2.Mobile.Tests.csproj` targets `net9.0` with `MSTest.Sdk/3.6.1` and link-compiles
+- `RIoT2.Mobile.csproj` targets `net10.0-android` and `net10.0-windows10.0.19041.0`.
+- `Tests/RIoT2.Mobile.Tests.csproj` targets `net10.0` with `MSTest.Sdk` 4.4.1 and link-compiles
   dashboard and beacon code for offline tests.
+- Android builds require Android SDK platform API 36.
 - There is no repository-local CI workflow and no tag-driven release workflow today.
 
-`Directory.Build.props` sets `BaseIntermediateOutputPath` to `C:\o\$(MSBuildProjectName)\` and
-`BaseOutputPath` to `C:\b\$(MSBuildProjectName)\`. Keep the explicit excludes for local `bin`,
-`obj` and `.vs` folders unless M8 replaces these paths with portable ones.
+`Directory.Build.repo.props`, imported by the shared `Directory.Build.props`, sets intermediates to
+`<repo>\obj\<ProjectName>\` and outputs to `<repo>\bin\<ProjectName>\`. Keep the explicit excludes
+for local `bin`, `obj` and `.vs` folders.
 
 ## Layout
 
@@ -97,10 +98,9 @@ payload.
 - `Services/PushNotificationService.cs` logs the FCM token and token changes at information level.
 - Android BLE legacy advertising is size-limited. `LegacyBeaconPayload.Validate` can reject even an
   empty encrypted message as too large for non-connectable manufacturer-data advertising.
-- `Directory.Build.props` hard-codes `C:\o\...` and `C:\b\...`, which is tracked for replacement
-  in M8.
-- The app targets .NET 9; .NET 9 reaches end of support on 10 November 2026. M8 tracks the move to
-  .NET 10 and MAUI 10.
+- `Plugin.Firebase.CloudMessaging` has no `net10.0-android` build; the app intentionally consumes
+  its `net9.0-android` assets from `net10.0-android`.
+- Android `targetSdkVersion` is 36 by default for `net10.0-android`; `minSdk` remains 21.
 
 ## Related work
 
@@ -110,4 +110,5 @@ payload.
   rotate/restrict exposed credentials and keys; Mobile's Firebase client key must be restricted
   before publishing.
 - [M8](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/plans/m08-dotnet10-migration.md):
-  move Mobile to MAUI/.NET 10 when dependencies allow, and make build output paths portable.
+  completed the MAUI/.NET 10 migration and portable build-output paths; nullable and
+  threading-analyzer practice steps remain open.

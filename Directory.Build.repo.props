@@ -1,0 +1,11 @@
+<Project>
+  <!-- RIoT2.Mobile settings, imported by the shared Directory.Build.props.
+       Each project builds into its own short folder under the repository root, which keeps the
+       MAUI Windows paths short. The excludes stop projects from globbing that output, and the
+       project-local bin/obj folders that older checkouts may still have. -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildThisFileDirectory)obj\**;$(MSBuildThisFileDirectory)bin\**;$(MSBuildThisFileDirectory).vs\**;obj\**;bin\**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

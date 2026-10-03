@@ -12,8 +12,8 @@ public class BeaconServiceTests
         IBeaconService service = new UnsupportedBeaconService();
         Assert.IsFalse(service.IsSupported);
         Assert.IsFalse(string.IsNullOrWhiteSpace(service.UnavailableReason));
-        await Assert.ThrowsExceptionAsync<PlatformNotSupportedException>(() => service.StartAsync());
-        await Assert.ThrowsExceptionAsync<PlatformNotSupportedException>(() => service.RestartAsync());
+        await Assert.ThrowsExactlyAsync<PlatformNotSupportedException>(() => service.StartAsync());
+        await Assert.ThrowsExactlyAsync<PlatformNotSupportedException>(() => service.RestartAsync());
         await service.StopAsync();
         Assert.IsFalse(service.IsAdvertising);
     }
@@ -40,7 +40,7 @@ public class BeaconServiceTests
         {
             Advertise = () => Task.FromException(new InvalidOperationException("Advertisement rejected."))
         };
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.StartAsync());
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => service.StartAsync());
         Assert.IsFalse(service.IsAdvertising);
         Assert.AreEqual("Advertisement rejected.", service.LastError);
         Assert.AreEqual(1, service.Stops);
@@ -56,7 +56,7 @@ public class BeaconServiceTests
     public async Task DeniedPermissionIsNotSuccessfulStartup()
     {
         var service = new FakeBeacon { PermissionGranted = false };
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.StartAsync());
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => service.StartAsync());
         Assert.IsFalse(service.IsAdvertising);
         Assert.AreEqual(0, service.Starts);
         Assert.IsNotNull(service.LastError);
@@ -69,7 +69,7 @@ public class BeaconServiceTests
         {
             Validate = _ => throw new InvalidOperationException("Payload too large.")
         };
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.StartAsync());
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => service.StartAsync());
         Assert.AreEqual(0, service.PermissionRequests);
         Assert.AreEqual(0, service.Starts);
         Assert.IsFalse(service.IsAdvertising);
@@ -109,9 +109,9 @@ public class BeaconServiceTests
         var factory = new BeaconPayloadFactory(settings, new FakeIdentity(), new AesCryptoService());
         byte[] payload = factory.BuildManufacturerData();
         Assert.IsTrue(payload.Length >= 57);
-        Assert.ThrowsException<InvalidOperationException>(() => LegacyBeaconPayload.Validate(payload));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LegacyBeaconPayload.Validate(payload));
         LegacyBeaconPayload.Validate(new byte[LegacyBeaconPayload.MaximumManufacturerDataLength]);
-        Assert.ThrowsException<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
             LegacyBeaconPayload.Validate(new byte[LegacyBeaconPayload.MaximumManufacturerDataLength + 1]));
     }
 

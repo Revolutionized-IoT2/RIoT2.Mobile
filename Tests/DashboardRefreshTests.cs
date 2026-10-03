@@ -102,7 +102,7 @@ public class DashboardRefreshTests
         vm.Activate();
         Assert.IsFalse(vm.IsRefreshing);
         vm.RefreshRequested += (_, _) => throw new InvalidOperationException("Navigation failed.");
-        Assert.ThrowsException<InvalidOperationException>(() => vm.RefreshCommand.Execute(null));
+        Assert.ThrowsExactly<InvalidOperationException>(() => vm.RefreshCommand.Execute(null));
         Assert.IsFalse(vm.IsLoading);
         Assert.IsFalse(vm.IsRefreshing);
         vm.Dispose();
