@@ -27,7 +27,10 @@ dotnet build .\RIoT2.Mobile.csproj -f net10.0-android
 - `Tests/RIoT2.Mobile.Tests.csproj` targets `net10.0` with `MSTest.Sdk` 4.4.1 and link-compiles
   dashboard and beacon code for offline tests.
 - Android builds require Android SDK platform API 36.
-- There is no repository-local CI workflow and no tag-driven release workflow today.
+- `.github/workflows/ci.yml` runs the unit tests on every push and builds the Android APK weekly
+  and on demand (`android.yml`, on Linux with `EnableWindowsTargeting`). A `x.y.z` tag runs
+  `release.yml`, which attaches `RIoT2.Mobile_<tag>.apk` and its `.sha256` to a GitHub release
+  ([CI guide](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/guides/ci.md)). Without a keystore the APK is signed with the build's debug key.
 
 `Directory.Build.repo.props`, imported by the shared `Directory.Build.props`, sets intermediates to
 `<repo>\obj\<ProjectName>\` and outputs to `<repo>\bin\<ProjectName>\`. Keep the explicit excludes

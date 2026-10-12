@@ -1,10 +1,13 @@
 # Changelog
 
-All notable changes to `RIoT2.Mobile`. This repository currently has no tag-driven release workflow
-and no git tags in the local checkout.
+All notable changes to `RIoT2.Mobile`. A version is released by pushing a git tag; CI then attaches
+the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+- Added CI and a release workflow: every push runs the unit tests, the Android APK builds weekly,
+  and a tag attaches `RIoT2.Mobile_<tag>.apk` and its `.sha256` to a GitHub release.
+  `.gitignore` no longer hides `.github/workflows`.
 - Changed the app to MAUI 10 with `net10.0-android` and `net10.0-windows10.0.19041.0`; Android
   targets API 36 and keeps `minSdk` 21.
 - Updated packages to `Microsoft.Maui.Controls` 10.0.110, `CommunityToolkit.Maui` 15.0.1,

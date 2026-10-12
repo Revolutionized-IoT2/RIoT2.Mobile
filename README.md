@@ -117,8 +117,10 @@ production secret.
 
 ## Releases
 
-Release notes are in [CHANGELOG.md](CHANGELOG.md). This repository currently has no tag-driven
-release workflow.
+Release notes are in [CHANGELOG.md](CHANGELOG.md). Push a tag `x.y.z` to release: the release
+workflow runs the tests, builds the Android APK and attaches `RIoT2.Mobile_<tag>.apk` with its
+`.sha256` to a GitHub release. CI runs the tests on every push and builds the APK weekly
+([CI guide](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/guides/ci.md)).
 
 ## Contributing
 
