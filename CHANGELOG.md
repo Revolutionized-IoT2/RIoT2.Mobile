@@ -14,6 +14,9 @@ and no git tags in the local checkout.
   `bin\<ProjectName>\` paths via `Directory.Build.repo.props`.
 - Fixed Android Firebase lifecycle initialization, Android 12+ Bluetooth permission requests and
   foreground-service notification error reporting.
+- Added `.gitleaks.toml`, which allowlists the Firebase client API key in
+  `Platforms/Android/google-services.json` for secret scans. The key ships in every APK; restrict it
+  in Google Cloud to the app's package name and signing SHA.
 - Documentation: `AGENTS.md` is the AI instruction file, `CLAUDE.md` imports it, and release notes
   now live in this file.
 

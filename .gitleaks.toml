@@ -1,0 +1,11 @@
+# Secret scanning (gitleaks) for RIoT2.Mobile. Extends the default rules and allowlists only
+# reviewed findings. Do not add real secrets here; rotate them instead.
+title = "RIoT2.Mobile"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Firebase Android client API key. It ships inside every APK and is not a server secret; it is restricted to the app's package name and signing SHA in Google Cloud (backlog MA1)."
+targetRules = ["gcp-api-key", "generic-api-key"]
+paths = ['''^Platforms/Android/google-services\.json$''']
