@@ -1,0 +1,24 @@
+name: Release
+
+# Push a x.y.z tag to attach RIoT2.Mobile_<tag>.apk and its .sha256 to a GitHub release.
+
+on:
+  push:
+    tags: ["*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    uses: Revolutionized-IoT2/.github/.github/workflows/dotnet-validate.yml@main
+    with:
+      build: Tests/RIoT2.Mobile.Tests.csproj
+      test: Tests/RIoT2.Mobile.Tests.csproj
+      github-packages: false
+
+  android:
+    needs: validate
+    uses: ./.github/workflows/android.yml
+    with:
+      publish: true

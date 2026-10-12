@@ -1,0 +1,81 @@
+name: Android build
+
+# Reusable within this repository: builds the signed Android APK. ci.yml runs it weekly and on
+# demand; release.yml runs it on a tag and attaches the APK to the GitHub release. Without a
+# keystore the APK is signed with the build's debug key, which is enough for sideloading.
+
+on:
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+
+jobs:
+  android:
+    name: android apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          workloads: maui-android
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then VERSION="$GITHUB_REF_NAME"; else VERSION="0.0.0"; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # The project also targets Windows; EnableWindowsTargeting lets restore run on Linux.
+      - name: Install the Android SDK platform
+        run: >
+          dotnet build RIoT2.Mobile.csproj -t:InstallAndroidDependencies -f net10.0-android
+          -p:EnableWindowsTargeting=true -p:AndroidSdkDirectory="$ANDROID_HOME" -p:AcceptAndroidSDKLicenses=true
+
+      - name: Publish the APK
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: >
+          dotnet publish RIoT2.Mobile.csproj -f net10.0-android -c Release
+          -p:EnableWindowsTargeting=true -p:AndroidSdkDirectory="$ANDROID_HOME"
+          -p:AndroidPackageFormat=apk
+          -p:ApplicationDisplayVersion="$VERSION" -p:ApplicationVersion="$GITHUB_RUN_NUMBER"
+          -o "$RUNNER_TEMP/apk"
+
+      - name: Name the APK
+        id: apk
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          src=$(find "$RUNNER_TEMP/apk" -name '*-Signed.apk' | head -n 1)
+          if [ -z "$src" ]; then echo "::error::No signed APK in the publish output"; exit 1; fi
+          dst="$RUNNER_TEMP/RIoT2.Mobile_$VERSION.apk"
+          cp "$src" "$dst"
+          (cd "$RUNNER_TEMP" && sha256sum "RIoT2.Mobile_$VERSION.apk" > "RIoT2.Mobile_$VERSION.apk.sha256")
+          echo "file=$dst" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android-apk
+          path: |
+            ${{ steps.apk.outputs.file }}
+            ${{ steps.apk.outputs.file }}.sha256
+
+      - name: Attach to the GitHub release
+        if: inputs.publish
+        uses: softprops/action-gh-release@v3
+        with:
+          name: RIoT2 Mobile ${{ steps.version.outputs.version }}
+          files: |
+            ${{ steps.apk.outputs.file }}
+            ${{ steps.apk.outputs.file }}.sha256
+          fail_on_unmatched_files: true

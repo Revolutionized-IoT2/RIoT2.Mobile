@@ -1,8 +1,10 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.github
+# Local AI files under .github stay untracked; the workflows are versioned.
+/.github/*
+!/.github/workflows/
 /.vs
 /obj/Debug
 /obj
