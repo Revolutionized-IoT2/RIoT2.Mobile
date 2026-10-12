@@ -106,9 +106,9 @@ payload.
 
 - Optional hardening item [S11](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/backlog/optional-hardening.md):
   WebView any URL, beacon key in `Preferences`, HTTP default.
-- Maintainer action [MA1](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/backlog/README.md#ma1-rotate-the-leaked-credentials-and-scrub-them-from-git-history):
-  rotate/restrict exposed credentials and keys; Mobile's Firebase client key must be restricted
-  before publishing.
+- Maintainer action [MA1](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/backlog/README.md#ma1-rotate-the-leaked-credentials-and-scrub-them-from-git-history)
+  (done 2026-10-12): the Firebase client key is restricted to the Android package and signing
+  certificate. Keep it restricted when the signing key changes.
 - [M8](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/plans/m08-dotnet10-migration.md):
   completed the MAUI/.NET 10 migration and portable build-output paths; nullable and
   threading-analyzer practice steps remain open.
