@@ -5,6 +5,10 @@ the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-12
+
+The first tagged release: MAUI 10, Android API 36.
+
 - Added CI and a release workflow: every push runs the unit tests, the Android APK builds weekly,
   and a tag attaches `RIoT2.Mobile_<tag>.apk` and its `.sha256` to a GitHub release.
   `.gitignore` no longer hides `.github/workflows`.
