@@ -113,5 +113,5 @@ payload.
   (done 2026-10-12): the Firebase client key is restricted to the Android package and signing
   certificate. Keep it restricted when the signing key changes.
 - [M8](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/plans/m08-dotnet10-migration.md):
-  completed the MAUI/.NET 10 migration and portable build-output paths; nullable and
-  threading-analyzer practice steps remain open.
+  completed the MAUI/.NET 10 migration and portable build-output paths; nullable reference types
+  (I32) and the threading analyzers (I31) fail CI on a warning.
