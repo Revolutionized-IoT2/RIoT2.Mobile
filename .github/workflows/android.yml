@@ -3,7 +3,8 @@ name: Android build
 # Reusable within this repository: builds the signed Android APK. ci.yml runs it weekly and on
 # demand; release.yml runs it on a tag and attaches the APK to the GitHub release. Without a
 # keystore the APK is signed with the build's debug key, which is enough for sideloading. The APK
-# gets an SPDX SBOM of the Android build output (I33).
+# gets an SPDX SBOM of the app's NuGet packages (I33). Microsoft's sbom-tool reads them from
+# project.assets.json: the Android build output has no deps.json for syft to read.
 
 on:
   workflow_call:
@@ -65,13 +66,17 @@ jobs:
           echo "file=$dst" >> "$GITHUB_OUTPUT"
 
       - name: SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          path: bin/RIoT2.Mobile/Release/net10.0-android
-          format: spdx-json
-          output-file: ${{ steps.apk.outputs.file }}.spdx.json
-          upload-artifact: false
-          upload-release-assets: false
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          APK: ${{ steps.apk.outputs.file }}
+        run: |
+          dotnet tool install --global Microsoft.Sbom.DotNetTool --version 4.1.13
+          drop="$RUNNER_TEMP/sbom-drop"
+          mkdir -p "$drop"
+          cp "$APK" "$drop/"
+          "$HOME/.dotnet/tools/sbom-tool" generate -b "$drop" -bc obj/RIoT2.Mobile -pn RIoT2.Mobile -pv "$VERSION" \
+            -ps Revolutionized-IoT2 -nsb https://github.com/Revolutionized-IoT2 -V Warning
+          cp "$drop/_manifest/spdx_2.2/manifest.spdx.json" "$APK.spdx.json"
 
       - uses: actions/upload-artifact@v7
         with:
