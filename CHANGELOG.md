@@ -5,6 +5,10 @@ the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+- Build: the threading analyzers ([I31](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-2.md#i31-async-cleanup-part-2-and-threading-analyzers-m)) run in every project from the shared
+  `Directory.Build.props` and `.editorconfig`: a blocking wait, `async void` or an unobserved task
+  fails the CI build. No change to the shipped binaries.
+
 ## [1.0.0] - 2026-10-12
 
 The first tagged release: MAUI 10, Android API 36.
