@@ -5,6 +5,10 @@ the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+- Build: `renovate.json` extends the shared Renovate preset ([I33](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-2.md#i33-supply-chain-s)). Renovate opens grouped
+  update pull requests once the app is installed (MA7).
+- Release: the APK gets `RIoT2.Mobile_<version>.apk.spdx.json`, an SPDX SBOM of the Android build
+  output, on the GitHub release.
 - Build: the shared `Directory.Build.props` sets `Nullable=enable` for every project ([I32](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-2.md#i32-nullable-reference-types-m)).
   The projects here already had it, so nothing changes.
 - Build: the threading analyzers ([I31](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-2.md#i31-async-cleanup-part-2-and-threading-analyzers-m)) run in every project from the shared

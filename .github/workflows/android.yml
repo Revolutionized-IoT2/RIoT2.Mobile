@@ -2,7 +2,8 @@ name: Android build
 
 # Reusable within this repository: builds the signed Android APK. ci.yml runs it weekly and on
 # demand; release.yml runs it on a tag and attaches the APK to the GitHub release. Without a
-# keystore the APK is signed with the build's debug key, which is enough for sideloading.
+# keystore the APK is signed with the build's debug key, which is enough for sideloading. The APK
+# gets an SPDX SBOM of the Android build output (I33).
 
 on:
   workflow_call:
@@ -63,12 +64,22 @@ jobs:
           (cd "$RUNNER_TEMP" && sha256sum "RIoT2.Mobile_$VERSION.apk" > "RIoT2.Mobile_$VERSION.apk.sha256")
           echo "file=$dst" >> "$GITHUB_OUTPUT"
 
+      - name: SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: bin/RIoT2.Mobile/Release/net10.0-android
+          format: spdx-json
+          output-file: ${{ steps.apk.outputs.file }}.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
       - uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: |
             ${{ steps.apk.outputs.file }}
             ${{ steps.apk.outputs.file }}.sha256
+            ${{ steps.apk.outputs.file }}.spdx.json
 
       - name: Attach to the GitHub release
         if: inputs.publish
@@ -78,4 +89,5 @@ jobs:
           files: |
             ${{ steps.apk.outputs.file }}
             ${{ steps.apk.outputs.file }}.sha256
+            ${{ steps.apk.outputs.file }}.spdx.json
           fail_on_unmatched_files: true
