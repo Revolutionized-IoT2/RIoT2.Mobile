@@ -73,6 +73,8 @@ iOS Keychain), see [BLE beacon](#ble-beacon).
 
 The default dashboard URL in `Services/SettingsService.cs` is an HTTP LAN URL for local
 development. Change it in the Settings page before using the app outside that environment.
+The UI serves the dashboard alone, laid out for phones, at `/dashboard/fullscreen` (RIoT2.UI
+1.11.0). Add `?page=<name>` to open a page and `?theme=dark` (or `light`, `system`) to set the theme.
 
 The app does not connect to MQTT directly. The dashboard loaded in the `WebView` is responsible for
 its own MQTT and orchestrator API communication. Platform source-of-truth docs:
