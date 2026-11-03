@@ -21,5 +21,8 @@
     <Compile Include="..\Services\AesCryptoService.cs" Link="Services\AesCryptoService.cs" />
     <Compile Include="..\Services\IDeviceIdentityService.cs" Link="Services\IDeviceIdentityService.cs" />
     <Compile Include="..\Services\BeaconPayloadFactory.cs" Link="Services\BeaconPayloadFactory.cs" />
+    <Compile Include="..\Services\ISecretStore.cs" Link="Services\ISecretStore.cs" />
+    <Compile Include="..\Services\IBeaconKeyStore.cs" Link="Services\IBeaconKeyStore.cs" />
+    <Compile Include="..\Services\BeaconKeyStore.cs" Link="Services\BeaconKeyStore.cs" />
   </ItemGroup>
 </Project>

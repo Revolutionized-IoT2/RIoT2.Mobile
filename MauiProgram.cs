@@ -31,6 +31,9 @@ namespace RIoT2.Mobile
 
             // Services
             builder.Services.AddSingleton<ISettingsService, SettingsService>();
+            builder.Services.AddSingleton<ISecretStore, MauiSecretStore>();
+            builder.Services.AddSingleton<IPreferenceStore, MauiPreferenceStore>();
+            builder.Services.AddSingleton<IBeaconKeyStore, BeaconKeyStore>();
             builder.Services.AddSingleton<IPushNotificationService, PushNotificationService>();
             builder.Services.AddSingleton(Connectivity.Current);
 

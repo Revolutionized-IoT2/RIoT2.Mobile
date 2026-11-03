@@ -48,7 +48,8 @@ for local `bin`, `obj` and `.vs` folders.
 | `Views/DashboardPage.xaml.cs` | WebView navigation events, reload, local error page and 30-second timeout |
 | `ViewModels/SettingsViewModel.cs` | Settings persistence, FCM subscription updates and beacon restart |
 | `Services/SettingsService.cs` | `Preferences` keys and defaults |
-| `Services/PushNotificationService.cs` | Firebase token logging, topic subscriptions and notification deep links |
+| `Services/BeaconKeyStore.cs` | Beacon key in `SecureStorage`, migration from legacy `Preferences` |
+| `Services/PushNotificationService.cs` | Firebase initialization, topic subscriptions and notification deep links |
 | `Services/*Beacon*`, `Platforms/*/Services/BeaconService.cs` | Cross-platform and platform BLE beacon logic |
 | `Tests/RIoT2.Mobile.Tests.csproj` | Offline dashboard and beacon regression tests |
 
@@ -78,8 +79,9 @@ payload.
   certificate before publishing.
 - Keep legacy `Preferences` keys in `Services/SettingsService.cs` unless a migration is written, so
   existing users keep their settings.
-- Treat `beaconKey` as sensitive. It currently lives in `Preferences`; move it to `SecureStorage`
-  before using it as a production secret.
+- `beaconKey` is a secret: read and write it only through `IBeaconKeyStore` (`SecureStorage`).
+  Never put it back in `ISettingsService` or `Preferences`, and never log it.
+- Never log the FCM registration token or other device identifiers at any level.
 - Keep push subscription changes in `SettingsViewModel.SaveAsync`: settings are saved, then
   `IPushNotificationService.UpdateChannelSubscriptionsAsync()` updates FCM topics.
 - Keep Firebase failures logged, not thrown through app startup. `App.xaml.cs` intentionally
@@ -92,13 +94,15 @@ payload.
 
 - The WebView accepts any URL the user stores in Settings. The default URL is HTTP, and there is no
   host allowlist (optional hardening item S11).
-- The dashboard URL, notification toggles and beacon values are all in `Preferences`, not encrypted
-  storage. This preserves the legacy app keys but is not suitable for production secrets.
+- The dashboard URL, notification toggles, beacon message and interval are in `Preferences`, not
+  encrypted storage. Only the beacon key is in `SecureStorage`.
+- `SettingsViewModel` loads the beacon key asynchronously in `LoadAsync` (called from
+  `SettingsPage.OnAppearing`). `SaveAsync` doesn't write the key until it has been loaded or typed,
+  so a fast save can't erase the stored key.
 - `Views/DashboardPage.xaml.cs` stops loading indicators after a 30-second timeout; it does not
   cancel an eventual WebView load.
 - Returning from Settings refreshes the dashboard when `Services/SettingsService.cs` has a new URL;
   same-URL refresh uses `Web.Reload()`.
-- `Services/PushNotificationService.cs` logs the FCM token and token changes at information level.
 - Android BLE legacy advertising is size-limited. `LegacyBeaconPayload.Validate` can reject even an
   empty encrypted message as too large for non-connectable manufacturer-data advertising.
 - `Plugin.Firebase.CloudMessaging` has no `net10.0-android` build; the app intentionally consumes
@@ -108,7 +112,8 @@ payload.
 ## Related work
 
 - Optional hardening item [S11](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/backlog/optional-hardening.md):
-  WebView any URL, beacon key in `Preferences`, HTTP default.
+  WebView any URL and HTTP default remain; the beacon key moved to `SecureStorage` and the FCM
+  token is no longer logged ([I44](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-3-4.md#i44-mobile-quick-hardening-s)).
 - Maintainer action [MA1](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/backlog/README.md#ma1-rotate-the-leaked-credentials-and-scrub-them-from-git-history)
   (done 2026-10-12): the Firebase client key is restricted to the Android package and signing
   certificate. Keep it restricted when the signing key changes.

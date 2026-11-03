@@ -103,11 +103,11 @@ public class BeaconServiceTests
     }
 
     [TestMethod]
-    public void CurrentProtocolCannotFitEvenWithEmptyMessage()
+    public async Task CurrentProtocolCannotFitEvenWithEmptyMessage()
     {
         var settings = new FakeSettings();
-        var factory = new BeaconPayloadFactory(settings, new FakeIdentity(), new AesCryptoService());
-        byte[] payload = factory.BuildManufacturerData();
+        var factory = new BeaconPayloadFactory(settings, new FakeKeyStore(), new FakeIdentity(), new AesCryptoService());
+        byte[] payload = await factory.BuildManufacturerDataAsync();
         Assert.IsTrue(payload.Length >= 57);
         Assert.ThrowsExactly<InvalidOperationException>(() => LegacyBeaconPayload.Validate(payload));
         LegacyBeaconPayload.Validate(new byte[LegacyBeaconPayload.MaximumManufacturerDataLength]);
@@ -143,7 +143,13 @@ public class BeaconServiceTests
 
     private sealed class FakePayload : IBeaconPayloadFactory
     {
-        public byte[] BuildManufacturerData() => [1];
+        public Task<byte[]> BuildManufacturerDataAsync() => Task.FromResult<byte[]>([1]);
+    }
+
+    private sealed class FakeKeyStore : IBeaconKeyStore
+    {
+        public Task<string> GetAsync() => Task.FromResult("test-key");
+        public Task SetAsync(string value) => Task.CompletedTask;
     }
 
     private sealed class FakeIdentity : IDeviceIdentityService
@@ -157,7 +163,6 @@ public class BeaconServiceTests
         public bool AlertsEnabled { get; set; }
         public bool NotificationsEnabled { get; set; }
         public bool BeaconEnabled { get; set; } = true;
-        public string BeaconKey { get; set; } = "test-key";
         public string BeaconMessage { get; set; } = "";
         public int BeaconIntervalSeconds { get; set; } = 1;
     }

@@ -144,7 +144,6 @@ public class DashboardRefreshTests
         public bool AlertsEnabled { get; set; }
         public bool NotificationsEnabled { get; set; }
         public bool BeaconEnabled { get; set; }
-        public string BeaconKey { get; set; } = "";
         public string BeaconMessage { get; set; } = "";
         public int BeaconIntervalSeconds { get; set; }
     }

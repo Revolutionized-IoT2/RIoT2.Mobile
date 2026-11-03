@@ -5,6 +5,21 @@ the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-03
+
+Mobile quick hardening ([I44](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-3-4.md#i44-mobile-quick-hardening-s), part of optional hardening item S11).
+
+- Security: the beacon shared key moved from plain `Preferences` to `SecureStorage` (Android
+  Keystore, iOS Keychain) behind the new `IBeaconKeyStore`. The first read after the upgrade moves
+  the old value and deletes the `Preferences` copy; no user action is needed. A read error is
+  reported and retried, never turned into a deleted key. A failed key write on Save shows an error
+  on the Settings page instead of crashing the app.
+- Security: `PushNotificationService` no longer logs the FCM registration token or its changes;
+  it logs only whether the token is ready.
+- Changed: `ISettingsService.BeaconKey` is removed, and `IBeaconPayloadFactory.BuildManufacturerData`
+  is now `BuildManufacturerDataAsync`.
+- Tests: `BeaconKeyStoreTests` cover the migration, caching, deletion and a read error.
+
 - Build: `renovate.json` extends the shared Renovate preset ([I33](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-2.md#i33-supply-chain-s)). Renovate opens grouped
   update pull requests once the app is installed (MA7).
 - Release: the APK gets `RIoT2.Mobile_<version>.apk.spdx.json`, an SPDX SBOM of the app's NuGet

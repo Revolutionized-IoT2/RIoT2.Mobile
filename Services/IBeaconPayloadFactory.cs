@@ -9,6 +9,6 @@ namespace RIoT2.Mobile.Services
         /// Builds and encrypts the payload:
         /// {unixepoch timestamp}|{mac address}|{message}.
         /// </summary>
-        byte[] BuildManufacturerData();
+        Task<byte[]> BuildManufacturerDataAsync();
     }
 }

@@ -44,7 +44,7 @@ namespace RIoT2.Mobile.Services
             LastError = null;
             try
             {
-                byte[] data = _payloadFactory.BuildManufacturerData();
+                byte[] data = await _payloadFactory.BuildManufacturerDataAsync();
                 ValidatePayload(data);
                 if (!await EnsurePermissionsAsync())
                     throw new InvalidOperationException("Bluetooth advertising permission was denied.");
@@ -129,7 +129,7 @@ namespace RIoT2.Mobile.Services
 
         private async Task AdvertiseOnceAsync()
         {
-            byte[] data = _payloadFactory.BuildManufacturerData();
+            byte[] data = await _payloadFactory.BuildManufacturerDataAsync();
             ValidatePayload(data);
             await OnAdvertiseAsync(data);
         }

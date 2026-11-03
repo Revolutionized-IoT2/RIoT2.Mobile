@@ -58,15 +58,16 @@ push notifications require `Platforms/Android/google-services.json` with build a
 ## Configuration
 
 Settings are stored with `Microsoft.Maui.Storage.Preferences` using keys preserved from the legacy
-Xamarin app:
+Xamarin app. The beacon shared key is the exception: it lives in `SecureStorage` (Android Keystore,
+iOS Keychain), see [BLE beacon](#ble-beacon).
 
-| Setting | Preference key |
+| Setting | Storage key |
 |---|---|
 | Dashboard URL | `textCtrlUrl` |
 | Alerts topic enabled | `cbAlerts` |
 | Notifications topic enabled | `cbNotifications` |
 | Beacon enabled | `beaconEnabled` |
-| Beacon shared key | `beaconKey` |
+| Beacon shared key | `beaconKey` (`SecureStorage`) |
 | Beacon message | `beaconMessage` |
 | Beacon interval seconds | `beaconIntervalSeconds` |
 
@@ -112,8 +113,13 @@ success. iOS base64-encodes the encrypted bytes in the advertisement local-name 
 does not allow arbitrary manufacturer data. Windows uses `UnsupportedBeaconService`, so beacon
 settings are disabled and attempts to start advertising fail explicitly.
 
-`Preferences` is not encrypted storage. Move `beaconKey` to `SecureStorage` before treating it as a
-production secret.
+`Services/BeaconKeyStore.cs` keeps the shared key in `SecureStorage`. Version 1.0.0 stored it in plain
+`Preferences`; the first read after the upgrade moves it to `SecureStorage` and deletes the
+`Preferences` copy. A storage read error is reported (beacon `LastError`, Settings page) and retried on
+the next read; nothing is deleted. Only an entry that MAUI can't decrypt is dropped by MAUI itself,
+and then the key must be entered again in Settings.
+
+The FCM registration token is never logged; the log only says whether the token is ready.
 
 ## Releases
 

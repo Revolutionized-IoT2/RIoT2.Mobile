@@ -8,8 +8,10 @@ namespace RIoT2.Mobile.ViewModels
     public partial class SettingsViewModel : ObservableObject
     {
         private readonly ISettingsService _settings;
+        private readonly IBeaconKeyStore _beaconKeyStore;
         private readonly IPushNotificationService _push;
         private readonly IBeaconService _beacon;
+        private bool _beaconKeyLoaded;
 
         public bool IsBeaconSupported => _beacon.IsSupported;
         public string? BeaconUnavailableReason => _beacon.UnavailableReason;
@@ -51,10 +53,12 @@ namespace RIoT2.Mobile.ViewModels
 
         public SettingsViewModel(
             ISettingsService settings,
+            IBeaconKeyStore beaconKeyStore,
             IPushNotificationService push,
             IBeaconService beacon)
         {
             _settings = settings;
+            _beaconKeyStore = beaconKeyStore;
             _push = push;
             _beacon = beacon;
 
@@ -64,9 +68,30 @@ namespace RIoT2.Mobile.ViewModels
 
             _beaconEnabled = IsBeaconSupported && _settings.BeaconEnabled;
             _beaconError = _beacon.LastError;
-            _beaconKey = _settings.BeaconKey;
+            _beaconKey = string.Empty;
             _beaconMessage = _settings.BeaconMessage;
             _beaconIntervalSeconds = _settings.BeaconIntervalSeconds;
+        }
+
+        /// <summary>
+        /// Reads the beacon key from encrypted storage. The page calls this when it appears.
+        /// </summary>
+        public async Task LoadAsync()
+        {
+            if (_beaconKeyLoaded)
+                return;
+
+            try
+            {
+                string key = await _beaconKeyStore.GetAsync();
+                if (string.IsNullOrEmpty(BeaconKey))
+                    BeaconKey = key;
+                _beaconKeyLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                BeaconError = ex.Message;
+            }
         }
 
         [RelayCommand]
@@ -77,13 +102,27 @@ namespace RIoT2.Mobile.ViewModels
             _settings.NotificationsEnabled = NotificationsEnabled;
 
             _settings.BeaconEnabled = IsBeaconSupported && BeaconEnabled;
-            _settings.BeaconKey = BeaconKey;
             _settings.BeaconMessage = BeaconMessage;
             _settings.BeaconIntervalSeconds = BeaconIntervalSeconds;
 
+            // Never overwrite the stored key with the placeholder shown before LoadAsync finished.
+            BeaconError = null;
+            if (_beaconKeyLoaded || !string.IsNullOrEmpty(BeaconKey))
+            {
+                try
+                {
+                    await _beaconKeyStore.SetAsync(BeaconKey ?? string.Empty);
+                    _beaconKeyLoaded = true;
+                }
+                catch (Exception ex)
+                {
+                    BeaconError = $"Could not save the beacon key: {ex.Message}";
+                    return;
+                }
+            }
+
             await _push.UpdateChannelSubscriptionsAsync();
 
-            BeaconError = null;
             try
             {
                 if (_settings.BeaconEnabled)

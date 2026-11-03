@@ -10,9 +10,8 @@ namespace RIoT2.Mobile.Services
         private const string AlertsKey = "cbAlerts";
         private const string NotificationsKey = "cbNotifications";
 
-        // BLE beacon preference keys.
+        // BLE beacon preference keys. The key itself is in BeaconKeyStore.
         private const string BeaconEnabledKey = "beaconEnabled";
-        private const string BeaconKeyKey = "beaconKey";
         private const string BeaconMessageKey = "beaconMessage";
         private const string BeaconIntervalKey = "beaconIntervalSeconds";
 
@@ -41,12 +40,6 @@ namespace RIoT2.Mobile.Services
         {
             get => Preferences.Get(BeaconEnabledKey, false);
             set => Preferences.Set(BeaconEnabledKey, value);
-        }
-
-        public string BeaconKey
-        {
-            get => Preferences.Get(BeaconKeyKey, string.Empty);
-            set => Preferences.Set(BeaconKeyKey, value);
         }
 
         public string BeaconMessage

@@ -42,12 +42,13 @@ namespace RIoT2.Mobile.Services
                 // Ask the user for notification permission (required on Android 13+ and iOS).
                 await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
 
-                // Log the token; the legacy app's SendRegistrationToServer was a no-op.
+                // The app uses topic subscriptions only, so the token isn't sent anywhere.
+                // The token addresses this device, so it is never logged (S11).
                 var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-                _logger.LogInformation("FCM token: {Token}", token);
+                _logger.LogInformation("FCM registration {Status}.", string.IsNullOrEmpty(token) ? "missing" : "ready");
 
-                CrossFirebaseCloudMessaging.Current.TokenChanged += (_, e) =>
-                    _logger.LogInformation("FCM token changed: {Token}", e.Token);
+                CrossFirebaseCloudMessaging.Current.TokenChanged += (_, _) =>
+                    _logger.LogInformation("FCM token changed.");
 
                 CrossFirebaseCloudMessaging.Current.NotificationReceived += (_, e) =>
                     _logger.LogInformation("FCM notification received: {Title}", e.Notification?.Title);
