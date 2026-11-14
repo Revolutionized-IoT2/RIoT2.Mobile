@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="456" height="456" viewBox="0 0 200 200">
-    <path d="M53.86 86.77 A48 48 0 0 1 100 52 M134.53 66.66 A48 48 0 0 1 141.57 124 M111.61 146.57 A48 48 0 0 1 58.43 124" fill="none" stroke="#FFFFFF" stroke-width="8.5" stroke-linecap="round" />
-    <circle cx="100" cy="52" r="11.5" fill="#FFFFFF" />
-    <circle cx="141.57" cy="124" r="11.5" fill="#FFFFFF" />
-    <circle cx="58.43" cy="124" r="11.5" fill="#FFFFFF" />
+    <path d="M50.01 85.67 A52 52 0 0 1 100 48 M137.41 63.88 A52 52 0 0 1 145.03 126 M112.58 150.46 A52 52 0 0 1 54.97 126" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+    <circle cx="100" cy="48" r="11" fill="#FFFFFF" />
+    <circle cx="145.03" cy="126" r="11" fill="#FFFFFF" />
+    <circle cx="54.97" cy="126" r="11" fill="#FFFFFF" />
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M74.44 107.60 V92.40 H79.96 A4.48 4.48 0 0 1 81.88 100.93 L85.16 107.60 H82.12 L79.16 101.36 H77.08 V107.60 Z M77.08 94.72 H79.80 A2.16 2.16 0 0 1 79.80 99.04 H77.08 Z M87.32 92.40 H89.96 V107.60 H87.32 Z M97.88 96.32 A5.76 5.76 0 1 1 97.88 107.84 A5.76 5.76 0 1 1 97.88 96.32 Z M97.88 98.64 A3.16 3.44 0 1 0 97.88 105.52 A3.16 3.44 0 1 0 97.88 98.64 Z M103.48 92.40 H114.36 V94.80 H110.24 V107.60 H107.60 V94.80 H103.48 Z M115.51 96.56 A4.96 4.96 0 1 1 123.86 100.71 L119.14 105.20 H125.56 V107.60 H115.48 V105.20 L122.12 98.89 A2.44 2.44 0 1 0 118.06 96.56 Z" />
 </svg>
