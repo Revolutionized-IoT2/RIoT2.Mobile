@@ -94,6 +94,11 @@ payload.
 
 - The WebView accepts any URL the user stores in Settings. The default URL is HTTP, and there is no
   host allowlist (optional hardening item S11).
+- Android blocks cleartext HTTP for apps targeting API 28 or later. The
+  `android:networkSecurityConfig` in `Platforms/Android/AndroidManifest.xml` points to
+  `Platforms/Android/Resources/xml/network_security_config.xml`, which allows cleartext for every
+  host. Don't remove it unless HTTPS dashboards are required; without it, every HTTP URL fails with
+  `ERR_CLEARTEXT_NOT_PERMITTED`.
 - The dashboard URL, notification toggles, beacon message and interval are in `Preferences`, not
   encrypted storage. Only the beacon key is in `SecureStorage`.
 - `SettingsViewModel` loads the beacon key asynchronously in `LoadAsync` (called from

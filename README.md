@@ -73,6 +73,9 @@ iOS Keychain), see [BLE beacon](#ble-beacon).
 
 The default dashboard URL in `Services/SettingsService.cs` is an HTTP LAN URL for local
 development. Change it in the Settings page before using the app outside that environment.
+On Android, cleartext HTTP is allowed for every host by
+`Platforms/Android/Resources/xml/network_security_config.xml`, because the controller UI is usually
+served over HTTP on the LAN.
 The UI serves the dashboard alone, laid out for phones, at `/dashboard/fullscreen` (RIoT2.UI
 1.11.0). Add `?page=<name>` to open a page and `?theme=dark` (or `light`, `system`) to set the theme.
 

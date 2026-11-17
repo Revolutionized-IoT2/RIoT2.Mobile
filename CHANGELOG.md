@@ -5,6 +5,11 @@ the Android APK to a GitHub release.
 
 ## [Unreleased]
 
+- Fixed: the Android dashboard `WebView` couldn't load an HTTP controller URL. Apps targeting
+  Android 9 (API 28) or later block cleartext traffic by default, so the page failed with
+  `ERR_CLEARTEXT_NOT_PERMITTED`. `Platforms/Android/Resources/xml/network_security_config.xml` now
+  allows cleartext for every host, because the URL is user-configurable.
+
 ## [1.1.0] - 2026-11-03
 
 Mobile quick hardening ([I44](https://github.com/Revolutionized-IoT2/.github/blob/main/docs/increments/phase-3-4.md#i44-mobile-quick-hardening-s), part of optional hardening item S11).
